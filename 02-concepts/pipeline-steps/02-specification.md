@@ -3,7 +3,22 @@
 # Bước 2 · Specification — Hình thành đặc tả (PRD)
 
 > **Tóm tắt.** Biến khung intent thành **PRD** chuẩn nghiệp vụ, tinh chỉnh qua 3 lăng kính, rồi qua **gate chất lượng** để PO đóng dấu `approved`.
-> **Commands:** `/generate-prd` → `/refine-prd` → `/review-context`
+> **Commands:** `/generate-prd` (lần đầu) · `/extend-prd` (**thêm** vào PRD đã có) · `/amend-prd` (**đổi** yêu cầu đã có) → `/refine-prd` → `/review-context`
+
+> **Chọn lệnh nào — bốn nhánh, phân biệt bằng THAO TÁC GHI:**
+>
+> | Tình huống | Lệnh | Ghi kiểu gì | Vì sao không dùng cái kia |
+> |---|---|---|---|
+> | PRD **chưa tồn tại** | `/generate-prd` | **Write** cả file | — |
+> | PRD đã có, **THÊM** UC/AC/BR mới | **`/extend-prd`** | Edit **add-only** — output là **superset chặt** | `/generate-prd` **từ chối chạy** trên file đã có |
+> | PRD đã có, **ĐỔI** một yêu cầu đang đúng cú pháp | **`/amend-prd`** | Edit **tại chỗ** — output **KHÔNG** phải superset | `/extend-prd` chỉ add-only; `/refine-prd` chỉ áp finding của chính nó |
+> | PRD đã có, sửa **vấn đề review đã soi ra** | `/refine-prd` → Review Board → `--resume` | Edit trong phạm vi finding | `/refine-prd` **không thêm/đổi được** theo ý định mới — nó tự cấm đụng section ngoài findings |
+>
+> **Xoá hẳn một BR/AC → không có lệnh, và có chủ ý:** xoá row làm `@trace.business_rules` trong `.feature` trỏ vào ID không còn ⇒ `TRACE_ORPHAN` 🔴. Dùng `/amend-prd --retire {ID}` — khai tử **tại chỗ**, giữ nguyên row + ID.
+>
+> ⚠️ **Sửa tay file `.md` là điểm mù (GAPS-v4 G54).** Mọi drift detector so **nhãn version**, không so nội dung (0 content hash trong codebase) — sửa mà không bump version ⇒ **0 cờ**. `/validate-traces` Step 3.9 canh cửa sau bằng cờ 🔴 `PRD_UNTRACKED_EDIT`.
+>
+> **`/generate-prd` dừng hẳn (không hỏi Y/N) nếu file đã tồn tại.** Ghi đè sẽ mất `# Change Log` + rollover, Version/Status thật, và **đánh số lại BR từ đầu** — cái cuối lan **ra ngoài file**, phá mọi `@trace.business_rules` trong `bdd/` đã sinh. Ba mất mát đều không hoàn tác được từ trong lệnh, nên không đặt sau một phím bấm.
 
 | | |
 |---|---|
@@ -29,7 +44,9 @@ PRD là **hợp đồng nghiệp vụ** giữa PO ↔ Dev ↔ AI. Đây là **c�
 
 | Lệnh | Vai trò | Kết quả |
 |------|---------|---------|
-| `/generate-prd` | **Sinh** PRD draft từ product-definition | PRD `Status: draft` |
+| `/generate-prd` | **Sinh** PRD draft từ product-definition. Từ chối chạy nếu PRD đã tồn tại | PRD `Status: draft` |
+| `/extend-prd` | **Thêm** UC/AC/BR vào PRD đã duyệt — đánh số **nối tiếp**, ghi **add-only** + guard sau-ghi, drain `feedback/prd-change-requests/` | PRD v+1, `Status → draft` |
+| `/amend-prd` | **Đổi tại chỗ** một AC/BR/UC đã duyệt — PO khai tường minh `amend_targets`, kiểm va chạm, guard sau-ghi **HAI CHIỀU** (Bảo toàn + Giới hạn). `--retire {ID}` khai tử tại chỗ | PRD v+1, `Status → draft` |
 | `/refine-prd` | **Tinh chỉnh** qua 3 lăng kính DEV/SA/PO (fan-out per-UC) | Findings để PO accept/reject |
 | `/review-context` | **Gate chất lượng** — findings P0–P5, phải sạch critical | PO đặt `Status: approved` |
 
@@ -73,7 +90,32 @@ PRD là **hợp đồng nghiệp vụ** giữa PO ↔ Dev ↔ AI. Đây là **c�
 
 ## Framework xử lý thế nào (Mechanics)
 
-**`/generate-prd`** — Round Q&A + confirm domain/terminology → sinh PRD draft đúng template, áp Business Language Guard.
+**`/generate-prd`** — Round Q&A + confirm domain/terminology → sinh PRD draft đúng template, áp Business Language Guard. **Guard đầu vào:** file đã tồn tại → dừng hẳn, chỉ sang `/extend-prd`.
+
+**`/extend-prd`** — 7 bước, tái dùng tối đa thứ đã có:
+
+1. Nạp trạng thái: `max_uc` / `max_br` / `max_ac`, UC hiện có, changelog, BDD đã sinh cho những UC nào
+2. **Drain hàng đợi** `prd-change-requests/` — `accepted` → nguyên liệu; `Open` → trình PO kèm số ngày chờ
+3. Discovery delta — tái dùng Phase 1/4/5/6 của `/define-product` (bỏ Phase 0/2/7 vốn là toàn-feature), **cộng phase "kiểm va chạm"**
+4. **Đánh số nối tiếp** — ràng buộc cứng nhất
+5. Ghi **Edit add-only** + guard sau-ghi
+6. Bump version + changelog — tái dùng **nguyên** `/refine-prd` Phase 3
+7. Report: nêu rõ **UC không đổi** + route `--realign-prd-version` cho chúng
+
+**Phase "kiểm va chạm" — `/define-product` không có.** Lúc discovery lần đầu chưa có gì để va chạm; ở đây thì có. Ba câu bắt buộc:
+
+| Câu | Vì sao |
+|---|---|
+| Phần thêm làm một BR cũ **sai đi** không? | *(BR cũ "tối đa 5", phần mới cần 20)* → đây là **sửa** BR cũ, không phải thêm mới → bump **major** |
+| Đã có UC/AC nào **phủ một phần** chưa? | → hỏi PO: mở rộng UC cũ hay tạo mới. **Không tự quyết** |
+| Cần dữ liệu/năng lực từ đâu khác? | → ghi vào §1c Phụ thuộc liên service |
+
+Va chạm âm thầm là cách một PRD **tự mâu thuẫn với chính nó**.
+
+**Hai ràng buộc cứng:**
+
+- **Không đánh lại BẤT KỲ ID cũ nào.** UC/AC/BR mới đều là `max + 1`. Số bị bỏ trống (do UC bị xoá ở version trước) **để trống vĩnh viễn** — ID đã từng tồn tại có thể còn bị tham chiếu ở BDD, code, bug report, hoặc PRD khác.
+- **Dòng changelog phải nêu rõ UC/AC/BR.** Đây là **contract**: `/generate-bdd` đọc để quyết cập nhật hẹp (Y) hay gen lại toàn bộ (F), và `/validate-traces` Step 4/5 đọc để lọc `PRD_DRIFT` 🟠 vs `PRD_STALE_REF` ⓘ. Một dòng mơ hồ (`"cập nhật theo yêu cầu mới"`) làm **mất cả hai** bộ lọc cùng lúc.
 
 **`/refine-prd`** — fan-out **mỗi UC × 3 lăng kính**:
 - **DEV** — chỗ nào khó hiện thực / thiếu định nghĩa?

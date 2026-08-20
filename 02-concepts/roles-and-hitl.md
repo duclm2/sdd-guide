@@ -70,4 +70,4 @@ QC        █████         🟠 cổng review test & script
 
 ## Đọc theo vai trò của bạn (Role Guides)
 
-→ [Product Owner](../../03-guides/product-owner.md) · [Developer](../../03-guides/developer.md) · [Architect](../../03-guides/architect.md) · [Tester/QA](../../03-guides/tester-qa.md)
+→ [Product Owner](../03-guides/product-owner.md) · [Developer](../03-guides/developer.md) · [Architect](../03-guides/architect.md) · [Tester/QA](../03-guides/tester-qa.md)

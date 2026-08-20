@@ -74,7 +74,23 @@
 
 **`/review-tech-docs`** — review **đa chiều**, findings gom theo từng UC (đọc §10 UC Coverage):
 - Kiểm tính đủ/đúng của contract, entity, error, dependency.
+- **T3 — BDD traceability**: design có khớp **nội dung** scenario không (2 chiều, match trong đúng lane platform).
+- **T3b — BDD freshness**: doc này dựng từ BDD **version nào**, BDD giờ ở version nào.
 - **T7 — cổng ký liên team**: contract cross-service phải được các team liên quan **ký** trước khi code.
+
+### T3b — vì sao độ tươi cần một cổng riêng
+
+Header tech-doc mang `@trace.bdd_versions` — **map theo platform** (`system=1.5, web=1.9`), số nhiều, cố ý khác `@trace.bdd_version` (scalar) của `.feature`. T3b so từng entry với `.feature` tương ứng:
+
+| Điều kiện | Severity | Auto-fix? |
+|---|---|---|
+| `.feature` **mới hơn** map | **Major** | ❌ cần người review lại §4/§4.5 rồi bump `@trace.revision` |
+| Platform có `.feature` nhưng **vắng** trong map | Major | ✅ thêm entry sau khi xác nhận §4 đã phủ |
+| Map có platform mà không còn `.feature` | Minor | ✅ xoá entry |
+
+> **Major chứ không Minor** vì `/generate-code` DS3 thấy doc `approved` + 0 blocker-GAP sẽ lấy shape DTO/endpoint/error ở §4 **nguyên văn**. Contract dựng từ BDD cũ lan **thẳng** vào code — tệ hơn drift-về-code vì nó sai từ nguồn.
+>
+> Khi áp fix, **cấm chỉ sửa số trong map** cho ca "`.feature` mới hơn": làm thế là dán nhãn "đã đồng bộ" lên một contract chưa ai review. Platform còn finding `open` thì **giữ số cũ** để cờ `TECHDOC_STALE_VS_BDD` của [`/validate-traces`](09-validate-traces.md) còn sáng.
 
 ---
 
@@ -82,7 +98,8 @@
 
 - 🟠 SA duyệt tech-design; **read-only** review — chỉ báo findings, không tự sửa.
 - 🔒 **T7 sign-off**: contract liên team chưa ký → không mở khoá code phía tiêu thụ.
-- `@trace.status: approved` trên tech-design → `/generate-code` dùng §4 làm nguồn contract; `draft/in-review` hoặc còn blocker-GAP → chỉ WARN (không chặn).
+- 🟡 **T3b (chặn mềm)**: còn finding T3b Major `open` → CHECKPOINT `Y/N` trước khi đặt `approved`. Mềm chứ không cứng như GATE §12 blocker-GAP, vì BDD hay bump vì lý do **không chạm contract** (sửa từ ngữ step) — người review là người biết.
+- `@trace.status: approved` trên tech-design → `/generate-code` dùng §4 làm nguồn contract; `draft/in-review` hoặc còn blocker-GAP → chỉ WARN (không chặn). Tech-doc **cũ hơn BDD** cũng chỉ WARN — nhưng là WARN quan trọng nhất, vì nó xuất hiện đúng lúc shape §4 được lấy nguyên văn.
 
 ---
 

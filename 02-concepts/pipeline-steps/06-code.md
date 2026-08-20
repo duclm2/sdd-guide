@@ -37,8 +37,28 @@ Code là **hệ quả của spec, không phải nguồn**. Bước này biến s
 
 | Artifact | Nội dung |
 |----------|----------|
-| File code | Theo thứ tự layer của stack, tag `@trace.implements/source` ở boundary |
-| `.trace/{domain}/{prd-slug}/{UC-ID}-{platform}.tsv` | Trace row cập nhật: `status`, `implemented_by`, `bdd_version`… |
+| File code | Theo thứ tự layer của stack, **block 5 tag** ở boundary (dưới) |
+| `.trace/{domain}/{prd-slug}/{UC-ID}-{platform}.tsv` | Trace row cập nhật: `status`, `implemented_by`, `gen_ver`, `fe_phase`… |
+| `_seams.tsv` | Sổ nợ seam/stub — chỗ chưa implement, để không đẻ mồ côi |
+
+### Block 5 tag trên mỗi entry-point
+
+```java
+// @trace.implements=AUTH-UC1-SC3
+// @trace.prd_version=1.2
+// @trace.bdd_version=1.4
+// @trace.tech_doc_revision=3
+// @trace.source=specs/auth/login/bdd/system/AUTH-UC1-login.feature
+public TokenDto login(...) { }
+```
+
+3 tag version không phải trang trí — chúng là nguồn của `PRD_DRIFT` / `BDD_DRIFT` / `TECHDOC_DRIFT` ở [`/validate-traces`](09-validate-traces.md). Thiếu một tag = drift detection **mù ở file đó**, im lặng.
+
+> **File phủ nhiều UC → lặp CẢ BLOCK theo từng method.** Không gộp về một header file, không trỏ `@trace.source` vào **thư mục**.
+>
+> Vì sao: 3 tag version là scalar **theo từng UC** — gộp lại thì không diễn đạt được "UC1 ở bdd v1.4, UC3 ở v2.1" → drift báo oan hoặc mù. Và các lệnh tra tag bằng **khớp chuỗi chính xác** (`/dev-gen-test`, `/review-code`, `/validate-traces` đều tìm `@trace.implements={UC-ID}`), nên tag trỏ thư mục ra **0 kết quả** → UC rơi về `UNTRACKED` dù code đã có.
+>
+> Quy tắc EXTEND vốn đã yêu cầu giữ **nguyên si** mọi `@trace.implements` cũ *kể cả của UC khác* — tức thiết kế vốn là **tích luỹ nhiều block**.
 
 ---
 
@@ -70,15 +90,29 @@ Code là **hệ quả của spec, không phải nguồn**. Bước này biến s
 5. **Build verify** — chạy `{conventions.build_command}`, ≤3 retry.
 6. **Ghi trace row** vào `.tsv` (trong spec repo nếu umbrella — thao tác ghi liên-repo).
 
-**Phase cho Frontend:**
-| Phase | Ý nghĩa |
+**Mode theo phase × platform:**
+| Mode | Ý nghĩa |
 |-------|---------|
 | `--phase=ui` | FE Phase 1 — sinh UI + layer **mock API** từ System BDD contract |
-| `--phase=integration` | FE nối vào **BE contract thật** (đọc tech-design từ spec repo) |
-| *(default)* | Backend — sinh từ tech-design §4 |
+| `--phase=integration` | FE Phase 2 — **thay** mock bằng **BE contract thật** (đọc tech-design từ spec repo); UI đã có |
+| *(default, `web`/`app`)* | **`fe_full`** — sinh UI **+** wire API thật một lần, bỏ lớp mock |
+| *(default, `system`)* | Backend — sinh từ tech-design §4 |
 
-**`/review-code`** — read-only, chỉ báo findings (không tự sửa: "AI tự fix tự review" = lặp lỗi).
-**`/fix-bug`** — sửa lỗi có root-cause + regression test; xem [Feedback Loop](10-feedback-loop.md).
+> Nhánh wire API thật (`integration` / `fe_full`) đi qua **DS4** (kiểm §4.5.4 đủ, vét nguồn rồi gộp-hỏi) và **DS5** (phát hiện component/service FE đang chạy → hỏi reuse/new, không dựng song song). Bảng hành vi đầy đủ từng bước → [Explain · generate-code](../../explain/09-generate-code.md#hành-vi-theo-mode-phase--platform).
+
+**`/review-code`** — read-only, chỉ báo findings (không tự sửa: "AI tự fix tự review" = lặp lỗi). **5 lăng kính:**
+
+| # | Lăng kính | Điểm đáng chú ý |
+|---|---|---|
+| 1 | Traceability | đủ **4 tag version** kèm mỗi `@trace.implements` · `@trace.source` trỏ file **có thật, đúng platform** · file đa-UC có block riêng theo method · **tag mồ côi** (`TRACE_ORPHAN`) = critical |
+| 2 | Layer Architecture | đúng layer, chiều phụ thuộc, không bypass |
+| 3 | Coding Standards | naming, wrapper, exception, transaction, không magic number |
+| 4 | Spec Compliance | mỗi scenario có implementation, không endpoint không-spec |
+| 5 | **Seam & Stub** | sổ `_seams.tsv` 0 dòng `READY` · stub không còn là binding khi hàng thật đã có · **method thật mồ côi** do đẻ song song |
+
+> Critical ở lăng kính 5 → `NEEDS_FIX` **kể cả khi build xanh và test từng-UC xanh** — đó chính là lớp lỗi hai thứ đó không bắt được.
+
+**`/fix-bug`** — sửa lỗi có root-cause + regression test, **và cập nhật sổ trace**; xem [Feedback Loop](10-feedback-loop.md).
 
 ---
 

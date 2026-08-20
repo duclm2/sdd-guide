@@ -77,12 +77,29 @@ AI *follow* các file này — để trống thì nó *đoán*:
 
 | Lệnh | Việc | Ghi đè | KHÔNG đụng |
 |------|------|--------|-----------|
-| `/update-framework` | Sync bản npm mới | `.agent/commands\|steps\|hooks\|rules\|templates\|skills\|modules` | `CLAUDE.md`, `project-context.yaml`, `domain-knowledge/`, `.trace/` |
+| `/update-framework` | Sync bản npm mới | `.agent/commands\|steps\|hooks\|rules\|templates\|skills\|modules` | `CLAUDE.md`, `.agent/project-context.yaml`, `.agent/project-lessons.md`, `.agent/review/`, `domain-knowledge/`, `.trace/`, `feedback/` |
 | `/sync` (umbrella) | Pull + init submodule + nổi feedback + Living Docs | — | — |
 
 Kiểm tra version mới nhất: `npm view @educa-corp/sdd-framework version`.
 
 > **Quy tắc edit (critical):** `.tmpl` + `steps/` là source of truth. Sửa framework artifact phải sửa `.tmpl`/`steps` rồi `node bin/build.js`. Sửa thẳng `.agent/commands/*.md` sẽ **mất** khi rebuild/update.
+>
+> Từ v0.4.2, nâng cấp **cứu** file bạn đã sửa trong vùng ghi đè: bản cũ lưu ở `.agent/.overwritten-{version}-{date}/` và danh sách được in ra. Ranh giới vùng-sửa-được đầy đủ: `.agent/README.md`. Chi tiết cơ chế: [Configuration › Vùng nào bị ghi đè](../04-reference/configuration.md#vùng-nào-bị-ghi-đè-khi-update).
+
+### Migration bố cục spec
+
+Một số version đổi **bố cục** chứ không chỉ nội dung lệnh. `/update-framework` Step 5.5 tự quét và nhắc, hoặc chạy tay (đều **dry-run mặc định**, thêm `--apply` để thực thi):
+
+| Lệnh | Khi nào cần |
+|---|---|
+| `--migrate-bdd-platform` | Có `.feature` nằm **trực tiếp** dưới `bdd/` (bố cục phẳng trước v0.4.1) → chuyển sang `bdd/{platform}/`. Bố cục phẳng làm `web`/`system` cùng UC **va tên và ghi đè nhau**. |
+| `--migrate-specs` | Còn `specs/prd/` hay `specs/bdd/` ở cấp gốc (bố cục artifact-type-first rất cũ) |
+| `--rename-prd-files` | PRD còn tên cố định `prd.md` thay vì `{TICKET-ID}-{prd-slug}.md` |
+
+```bash
+npx @educa-corp/sdd-framework --migrate-bdd-platform          # xem plan
+npx @educa-corp/sdd-framework --migrate-bdd-platform --apply  # thực thi
+```
 
 ---
 

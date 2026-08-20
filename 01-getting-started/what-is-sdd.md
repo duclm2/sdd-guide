@@ -26,8 +26,10 @@ Dùng AI tự do (mở chat, gõ prompt, copy-paste) → AI suy diễn theo tr�
 | Vấn đề | Cách giải |
 |--------|-----------|
 | AI viết lung tung, không bám requirement | Spec là **anchor cứng**; code link `@trace.source` về scenario |
-| Sửa code → spec lệch → AI hiểu sai lần sau | **Spec là single source of truth**; code không lưu version riêng |
-| Sửa spec → không biết code nào cần regen | **Trace state `.tsv` per-UC** → phát hiện OK/GAP/DRIFT/UNTRACKED |
+| Sửa code → spec lệch → AI hiểu sai lần sau | **Spec là SSOT của "bản hiện tại"**; code mang version của "bản tôi được sinh theo" — **lệch nhau chính là tín hiệu drift** |
+| Sửa spec → không biết code nào cần regen | **Trace state `.tsv`** một sổ / UC × platform → `OK`/`GAP`/`DRIFT`/`UNTRACKED`/`ORPHANED` |
+| Xoá scenario → code mồ côi nằm im | **Quét ngược code → spec**; code trỏ vào SC không còn tồn tại bị gắn cờ 🔴, không tự hết |
+| Build xanh nhưng ghép luồng chạy vào no-op | **Sổ seam/stub** — bắt lớp lỗi mà build + test từng-UC không thấy |
 | PRD/BDD kém → code rác hàng loạt | **Quality gate** (`/review-context`) phải sạch critical + PO approve |
 | Lỗi/định hướng sai lặp lại | **`/learn`** ghi lesson, nạp lại vào context |
 | Đổi tech stack → viết lại workflow | **Module overlay** — skill đọc `stack-profile.yaml`, không hardcode |

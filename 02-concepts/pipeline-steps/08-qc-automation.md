@@ -21,6 +21,7 @@
 
 - Phân rã yêu cầu thành test case bám scenario, phát hiện **gap tài liệu**.
 - Chạy test thật, ghi **`qc_status` chính thức** + **evidence**.
+  ⚠️ Nhưng `/qc-run-test` **đọc cột `status` trước khi ghi `pass`** *(GAPS-v4 G55)*: row `DRIFT`/`ORPHANED` + test xanh → hạ về `not_run`, và **không** đóng bug nào ở lần chạy đó. `fail`/`skip` ghi bình thường.
 - Phân loại FAIL: **script-bug** (sửa script) vs **product-gap** (giữ FAIL + evidence, **không bao giờ fake-pass**).
 - Đẩy **product-gap** ngược về PO/Dev.
 

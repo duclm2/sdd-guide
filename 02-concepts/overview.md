@@ -11,7 +11,7 @@
 ```mermaid
 flowchart TD
     S["0 · Setup<br/>/setup-ai-first"] --> D["1 · Discovery<br/>/define-product"]
-    D --> SP["2 · Specification<br/>/generate-prd · /refine-prd · /review-context"]
+    D --> SP["2 · Specification<br/>/generate-prd · /extend-prd · /amend-prd<br/>/refine-prd · /review-context"]
     SP --> DS["3 · Design-Spec<br/>(chỉ FE/App)"]
     SP --> B["4 · BDD<br/>/generate-bdd · /review-context"]
     DS --> B

@@ -36,9 +36,14 @@ BDD là **trái tim của traceability**. Mỗi scenario là một đơn vị h�
 | Artifact | Nội dung |
 |----------|----------|
 | `specs/{domain}/{prd-slug}/bdd/{web\|app\|system}/{UC-ID}*.feature` | Scenario Gherkin + tag `@trace.*` + Coverage Matrix |
+| `.trace/{domain}/{prd-slug}/{UC-ID}-{platform}.tsv` | Sổ trace — **một sổ cho mỗi UC × platform** |
 | `@trace.status: approved` (sau review) | 🔒 Mở khoá `/generate-tech-docs` |
 
-> BDD chia theo **platform/scope**: `web/`, `app/`, `system/` (cross-service).
+> **Subfolder `{platform}/` LUÔN có — mọi mode, kể cả umbrella.** `web` và `system` của cùng một UC là **hai file khác nhau**; bỏ subfolder thì chúng ra cùng filename và **ghi đè nhau**. Trace cũng tách theo platform, nên bố cục spec phải khớp. Mỗi `.feature` còn mang `@trace.platform` **khớp** segment path của chính nó.
+>
+> Ở umbrella mode, `active_platform` được **suy từ `active_module`** (react/vue/… → `web` · flutter/RN/… → `app` · java-spring/golang/… → `system`); không suy được thì lệnh **dừng và hỏi**, không ghi file.
+>
+> *Project còn ở bố cục phẳng cũ (`bdd/*.feature`): chạy `npx @educa-corp/sdd-framework --migrate-bdd-platform` — dry-run mặc định.*
 
 ---
 
@@ -68,7 +73,24 @@ BDD là **trái tim của traceability**. Mỗi scenario là một đơn vị h�
 2. 🛑 **UC decomposition checkpoint** — trình danh sách UC/SC để PO chốt.
 3. PRD lớn → **fan-out**: orchestrator giao mỗi UC cho một sub-agent (`_agent_mode`) sinh song song.
 4. Sinh `.feature` theo `feature.template`, gắn `@trace.*`, dựng Coverage Matrix.
-5. Có thể incorporate **scenario proposal** đã `accepted` từ tester (xem [Feedback Loop](10-feedback-loop.md)).
+5. **Gen lại:** bump `@trace.sc_version` **+0.1 cho từng SC có thân đổi** (xem dưới); SC bị xoá mà **đã có code** → giữ row `.tsv`, đặt `status = ORPHANED` (không xoá row — xoá đi thì code thành vô hình).
+6. Có thể incorporate **scenario proposal** đã `accepted` từ tester — khi chèn phải **normalize**: gán `sc_id` kế tiếp, strip `@proposed`/`@from-test`, append row `.tsv` (xem [Feedback Loop](10-feedback-loop.md)).
+
+### `sc_version` — tín hiệu DRIFT duy nhất
+
+Mỗi scenario mang `@trace.sc_version` riêng. Nó là **thứ duy nhất** cho `/validate-traces` biết code của SC đó đã lỗi thời (`spec_ver != gen_ver` → `DRIFT`).
+
+| Đổi cái gì | Bump? |
+|---|:---:|
+| Tên `Scenario:` · chuỗi step · data table · `# Side-effects:` | ✅ **+0.1** |
+| `@trace.business_rules` · tag `@happy`/`@edge` · comment | ❌ không |
+| Header file · Coverage Matrix · gom NHÓM | ❌ không (đó là `bdd_version`) |
+
+**Ai bump:** `/generate-bdd` (khi gen lại, so 4 thành phần trên với bản trên disk) · `/review-context --fix`/`--resume` (mỗi SC có finding đổi thân) · **người sửa tay** (có mục trong Pre-merge Checklist).
+
+> Sửa SC mà quên bump → code sinh từ bản cũ **vĩnh viễn hiện `OK`**, không ai biết phải regen. Bump vô cớ thì ngược lại: mọi SC hiện `DRIFT` giả và cờ mất giá trị.
+>
+> Phân biệt với `@trace.bdd_version` (**cấp file**): nó bắt thay đổi mà `sc_version` không thấy — Background, `@trace.dataset`, Business Definition. Cả hai đều cần.
 
 **`/review-context` (BDD)** — findings có mã, sạch critical mới `approved`:
 
