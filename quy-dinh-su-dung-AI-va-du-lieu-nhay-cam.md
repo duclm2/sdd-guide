@@ -82,7 +82,7 @@ Nếu bạn (hoặc đồng nghiệp) đã đưa dữ liệu mức Đỏ/Cam và
 1. **Báo ngay** cho `[Trưởng phòng / kênh #security]` trong vòng **1 giờ**. Không tự xử lý im lặng.
 2. **Xoay (rotate) toàn bộ credential đã bị phơi nhiễm** ngay lập tức — coi như đã bị compromise, không cần chờ bằng chứng bị lạm dụng.
 3. Xóa cuộc hội thoại trên công cụ AI (lưu ý: xóa chat **không** đảm bảo dữ liệu đã bị xóa khỏi mọi bản lưu trữ — vì vậy bước 2 là bắt buộc, không phải tùy chọn).
-4. `[Security]` rà soát audit log để đánh giá phạm vi ảnh hưởng và lập báo cáo trong `[3]` ngày làm việc.
+4. `[P. HTHT]` rà soát audit log để đánh giá phạm vi ảnh hưởng và lập báo cáo trong `[3]` ngày làm việc.
 
 **Chính sách không trừng phạt khi báo cáo trung thực:** người tự giác báo cáo sự cố sẽ không bị xử lý kỷ luật. Việc che giấu sự cố mới là hành vi bị xử lý.
 
