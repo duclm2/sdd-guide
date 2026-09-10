@@ -42,14 +42,15 @@ Chỉ sử dụng công cụ AI trong danh sách sau, và **phải đăng nhập
 
 | Công cụ | Mục đích được duyệt | Ghi chú |
 |---|---|---|
-| `[VD: Claude – gói Team/Enterprise]` | Code, tài liệu, phân tích | Đã tắt lưu trữ/huấn luyện dữ liệu |
+| `[Claude – gói Team]` | Code, tài liệu, phân tích | Được cấp theo danh sách - Khối PTSP do Ms. TrangNT46 quản lý việc cấp phát tài khoản|
+| `[Gemini – gói Enterprise]` | Code, tài liệu, phân tích | Được cấp theo danh sách - P.HTHT do Mr. TrungNT4 quản lý việc cấp phát tài khoản|
 
 **Yêu cầu kỹ thuật với mọi công cụ được duyệt:**
 - Dùng gói doanh nghiệp có cam kết **không dùng dữ liệu để huấn luyện** và có kiểm soát thời gian lưu trữ.
-- Tài khoản quản lý tập trung qua SSO, thu hồi được khi nhân sự nghỉ việc.
-- Không cài extension/MCP server ngoài danh sách trắng do DevOps duyệt.
+- Tài khoản quản lý tập trung theo emails/seats, thu hồi được khi nhân sự nghỉ việc.
+- Không cài extension/MCP server ngoài danh sách whitelist do DevOps duyệt.
 
-Muốn dùng công cụ mới → gửi yêu cầu cho `[DevOps/Security]` để đánh giá trước khi dùng.
+Muốn dùng công cụ mới → gửi yêu cầu cho `[P. HTHT]` để đánh giá trước khi dùng.
 
 ## 5. Con đường an toàn (thay thế cho hành vi bị cấm)
 
@@ -63,18 +64,16 @@ Quy định chỉ hiệu quả khi có cách làm thuận tiện tương đươn
 | Cần credential trong quá trình dev | Lấy từ **secret manager** (`[Vault / AWS Secrets Manager / 1Password]`), không hardcode, không copy vào chat |
 | Cần AI review code có config | Dùng file `.env.example` với giá trị giả |
 
-Trách nhiệm chuẩn bị: `[DevOps]` cung cấp DB staging đã masking và pipeline sinh dữ liệu giả trước ngày `[điền deadline]`.
+Trách nhiệm chuẩn bị: `[P. HTHT]` cung cấp DB staging đã masking và pipeline sinh dữ liệu giả trước ngày `[điền deadline]`.
 
 ## 6. Kiểm soát kỹ thuật bắt buộc
 
-`[DevOps/Security]` triển khai và duy trì:
+`[P. HTHT]` triển khai và duy trì:
 
 1. **Quét secret:** cài `gitleaks` hoặc `trufflehog` ở pre-commit hook và CI pipeline. Pipeline **fail** nếu phát hiện secret.
-2. **Phân tách quyền DB:** tài khoản dev không có quyền truy cập DB production. Truy cập production chỉ qua bastion/jump host, có ghi log, có phê duyệt theo phiên (JIT access).
-3. **Data masking:** DB staging được refresh định kỳ từ production **qua bước masking bắt buộc**, không bao giờ restore trực tiếp.
-4. **Audit log:** bật audit log trên DB production và lưu tối thiểu `[90]` ngày.
-5. **Kiểm tra cấu hình AI/MCP:** rà soát định kỳ `[hàng tháng]` các file cấu hình MCP, extension IDE, và integration của AI agent trên máy nhân viên.
-6. **Chặn `.env` khỏi git:** `.gitignore` chuẩn hóa cho mọi repo, kèm kiểm tra tự động.
+2. **Audit log:** bật audit log trên DB production và lưu tối thiểu `[90]` ngày.
+3. **Kiểm tra cấu hình AI/MCP:** rà soát định kỳ `[hàng tháng]` các file cấu hình MCP, extension IDE, và integration của AI agent trên máy nhân viên.
+4. **Chặn `.env` khỏi git:** `.gitignore` chuẩn hóa cho mọi repo, kèm kiểm tra tự động.
 
 ## 7. Xử lý sự cố rò rỉ
 
