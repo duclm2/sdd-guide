@@ -1,4 +1,4 @@
-[← /generate-tech-docs](07-generate-tech-docs.md) · [Explain Home](README.md) · [Next: /generate-code →](09-generate-code.md)
+[← /map-testids](11-map-testids.md) · [Explain Home](README.md) · [Next: /generate-code →](09-generate-code.md)
 
 # 08 · `/review-tech-docs` — Review Technical Design (8 dimension + ký T7)
 
@@ -39,8 +39,19 @@ Chạy 8 dimension (mỗi cái phân loại severity + auto-fixable):
 | **T3b** | **BDD Freshness** | Doc dựng từ BDD **version nào**, BDD giờ ở version nào — so từng entry của map `@trace.bdd_versions` với `.feature` tương ứng | 2 ca (thêm/xoá entry) |
 | **T4** | Cross-PRD Endpoint Conflict | grep endpoint/entity ở doc PRD khác, **load-on-hit**; va chạm shape/behavior → critical | ❌ |
 | **T5** | Internal Consistency | Sequence vs mô tả, API spec vs code sketch, ref không định nghĩa | một phần |
-| **T6** | Structural Completeness | Section chuẩn có mặt & không rỗng | ✅ thêm skeleton |
+| **T6** | Structural Completeness | Section chuẩn có mặt & không rỗng · **+ hợp đồng test-id** (dưới) | ✅ thêm skeleton — **trừ** hai ca test-id |
 | **T7** | Cross-Team API Contract | **Cổng ký liên team** — chỉ khi doc có backend (system) + không phải `api_source: existing` | sign-off block auto-fix |
+
+**T6 · hợp đồng test-id** *(mới)* — hai ca **Major** và **không tự sửa được**:
+
+| Điều kiện | Severity | Auto-fix |
+|---|---|---|
+| **§4.5.6 Test Selectors rỗng** (doc có platform client) | **Major** | ❌ — phải chạy `/map-testids` |
+| Header **thiếu** `@trace.testid_attr` | **Major** | ❌ — phải chạy `/map-testids` |
+
+> **Vì sao KHÔNG auto-fix.** Tự điền một bảng test-id là **bịa hợp đồng** — mà hợp đồng này có hai bên tiêu thụ (FE gắn attribute, QC viết script). Thêm skeleton rỗng thì lần review sau nó "có mặt & không rỗng" và cổng tự tắt, trong khi bảng vẫn vô nghĩa.
+>
+> **Vì sao cổng nằm ở đây.** Đây là chỗ **cuối cùng còn chặn được trước khi có code**. Trôi qua đây thì `/generate-code` phải tự xoay xở với một bảng rỗng, và QC thì không có gì để bám.
 
 **T3b chi tiết** — T3 kiểm *nội dung* khớp, T3b kiểm *độ tươi*:
 
@@ -66,6 +77,7 @@ Sau phân tích → ghi findings; **Resume Mode** áp finding `accepted`/`modifi
 ## Checkpoint & Gate
 
 - 🔒 **T7 sign-off** — contract liên team chưa ký đủ (be/fe/app/sa) → chưa mở khoá code phía tiêu thụ.
+- 🟠 **T6 test-id** — §4.5.6 rỗng hoặc thiếu `@trace.testid_attr` → Major, không tự sửa. Đường ra là chạy [`/map-testids`](11-map-testids.md), không phải bấm qua.
 - 🟡 **T3b (chặn mềm)** — còn finding T3b Major `open` → CHECKPOINT `Y/N` trước khi đặt `approved`.
 - Read-only — không tự sửa; findings qua Board → `--resume`.
 
@@ -91,4 +103,4 @@ Sau phân tích → ghi findings; **Resume Mode** áp finding `accepted`/`modifi
 
 ## Kết nối
 
-**Trước:** [`/generate-tech-docs`](07-generate-tech-docs.md) · **Sau:** đủ ký T7 → [`/generate-code {feature}`](09-generate-code.md).
+**Trước:** [`/generate-tech-docs`](07-generate-tech-docs.md) → [`/map-testids`](11-map-testids.md) · **Sau:** đủ ký T7 + §4.5.6 đã chốt → **hai nhánh song song**: [`/generate-code {feature}`](09-generate-code.md) (FE gắn attribute) ∥ [`/qc-design-test`](17-qc-design-test.md) (QC dựng test theo cùng bảng).

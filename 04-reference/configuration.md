@@ -20,7 +20,7 @@ project:
 paths:
   specs_dir: "specs"                 # gốc mọi spec artifact
   trace_dir: ".trace"                # trace state .tsv
-  qc_dir: "docs"                     # working docs của QC
+  qc_dir: "docs"                     # working docs của QC — {qc_dir}/{TICKET-ID}/{platform}/
   qc_skills_dir: ".agent/skills/qc"  # nơi qc-* nạp skill (override sang repo QC riêng)
   refinement_dir: ".agent/review"    # findings review
 

@@ -1,4 +1,4 @@
-[← /map-testids](11-map-testids.md) · [Explain Home](README.md) · [Next: /dev-run-test →](13-dev-run-test.md)
+[← /review-code](10-review-code.md) · [Explain Home](README.md) · [Next: /dev-run-test →](13-dev-run-test.md)
 
 # 12 · `/dev-gen-test` — Sinh bộ tự-kiểm của Dev
 

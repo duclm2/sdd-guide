@@ -1,8 +1,8 @@
 [← /extend-prd](02b-extend-prd.md) · [Explain Home](README.md) · [Next: /review-context →](04-review-context.md)
 
-# 03 · `/refine-prd` — Tinh chỉnh PRD qua 3 lăng kính
+# 03 · `/refine-prd` — Tinh chỉnh PRD qua 4 lăng kính
 
-> **Một câu.** Fan-out review PRD qua **3 lăng kính DEV / SA / PO**, chạy **vòng lặp completeness-critic** để hội tụ đầy đủ trong một lần, rồi sinh file findings cho PO accept/reject ở Review Board.
+> **Một câu.** Fan-out review PRD qua **4 lăng kính QA / DEV / SA / PO**, chạy **vòng lặp completeness-critic** để hội tụ đầy đủ trong một lần, rồi sinh file findings cho PO accept/reject ở Review Board.
 
 ---
 
@@ -33,9 +33,10 @@ Một lượt review đơn không bao giờ liệt kê hết vấn đề — mod
 Chạy qua step **review-fanout** với tham số `GRANULARITY = per-uc`:
 
 ### Phase 1 — Fan-out song song theo dimension
-- **DIMENSIONS = 3 lăng kính** (mỗi lăng kính một sub-agent, context window mới, quét toàn PRD chỉ qua lăng kính đó):
+- **DIMENSIONS = 4 lăng kính** (mỗi lăng kính một sub-agent, context window mới, quét toàn PRD chỉ qua lăng kính đó):
   | Lăng kính | Soi gì |
   |-----------|--------|
+  | **QA** (tầng nghiệm thu) *(bật 2026-08-25)* | AC có nêu **outcome quan sát/kiểm được** chưa? AC có lặp nội dung BR (trùng tầng) không? — hỏi về **HÌNH THỨC**, KHÔNG về nội dung thiếu |
   | **DEV** (cơ chế nghiệp vụ) | BR + Business Logic đã đủ & không mơ hồ để build không phải đoán chưa? Nhánh nghiệp vụ thiếu, điều kiện biên, đường lỗi bỏ ngỏ |
   | **SA** (thông suốt & nhất quán) | Luồng nghiệp vụ thông suốt trên cả feature/domain? Tương tác UC, quan hệ entity, vòng đời trạng thái, ai-làm-gì |
   | **PO** | Scope khoanh vùng? Priority? Success metric? Rủi ro scope creep? |
@@ -66,7 +67,8 @@ Chạy qua step **review-fanout** với tham số `GRANULARITY = per-uc`:
 
 ## Cơ chế đặc biệt
 
-- **Không có `--fix` mode** (khác `/review-context`) — finding 3 lăng kính là phán đoán DEV/SA/PO, **bắt buộc qua người** ở Board; `auto_fixable` chỉ là gợi ý quick-accept.
+- **Lăng kính QA hẹp có chủ ý** — nó hỏi *"phát biểu này kiểm chứng được không?"*, KHÔNG hỏi *"còn thiếu gì?"*. Ở thời điểm PRD chỉ có PRD (design-spec/BDD/tech-doc chưa tồn tại), nên không phân biệt được *"PRD thiếu X"* với *"PRD để X cho design-spec"*. Câu hỏi nội dung thuộc `/qc-analyze`. Số liệu: review chỉ-PRD ra ~14 gap, review đủ 4 nguồn ra ~9,4 — chênh lệch là câu tài liệu sau trả lời hộ.
+- **Không có `--fix` mode** (khác `/review-context`) — finding 4 lăng kính là phán đoán QA/DEV/SA/PO, **bắt buộc qua người** ở Board; `auto_fixable` chỉ là gợi ý quick-accept.
 - **`resolution_edge_cases`** — phân tích bậc-hai (chỉ critical/major): "nếu chốt phương án này thì đẻ ra edge case gì?" → PO thấy trước khi accept (advisory, không chặn).
 - **QA lens đang DISABLED** (comment trong file) — có hướng dẫn bật lại nếu cần.
 
@@ -74,10 +76,10 @@ Chạy qua step **review-fanout** với tham số `GRANULARITY = per-uc`:
 
 ## 👓 Góc nhìn tối ưu
 
-- **Đây là command tốn agent/token nhất phía thượng nguồn** — `per-uc` × 3 lăng kính × (UC+1) + tới 3 vòng critic. `AGENT_CAP=12` là núm chỉnh chính. Với PRD lớn, đây là điểm cần cân đối chi phí ↔ độ đầy đủ.
+- **Đây là command tốn agent/token nhất phía thượng nguồn** — `per-uc` × 4 lăng kính × (UC+1) + tới 3 vòng critic. `AGENT_CAP=12` là núm chỉnh chính. Với PRD lớn, đây là điểm cần cân đối chi phí ↔ độ đầy đủ.
 - **Completeness-critic tới 3 vòng** — điểm đáng đo: thực tế hội tụ ở vòng mấy? Nếu thường 1–2 vòng thì cap 3 hợp lý.
 - **Full/delta logic phức tạp** (`applied_to_version` tracking) — mạnh nhưng nhiều nhánh; dễ rơi về FULL khi có actor khác sửa PRD (vd `/review-context` xen giữa).
-- **Ranh giới với `/review-context`** — cả hai đều review PRD, dùng chung review-fanout. `/refine-prd` = phán đoán chất lượng nghiệp vụ (3 lăng kính); `/review-context` = check có mã P0–P5 + auto-fix. Chồng lấn có chủ đích hay có thể gộp?
+- **Ranh giới với `/review-context`** — cả hai đều review PRD, dùng chung review-fanout. `/refine-prd` = phán đoán chất lượng nghiệp vụ (4 lăng kính); `/review-context` = check có mã P0–P5 + auto-fix. Chồng lấn có chủ đích hay có thể gộp?
 
 ---
 

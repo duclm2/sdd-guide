@@ -1,4 +1,4 @@
-[← /generate-code](09-generate-code.md) · [Explain Home](README.md) · [Next: /map-testids →](11-map-testids.md)
+[← /generate-code](09-generate-code.md) · [Explain Home](README.md) · [Next: /dev-gen-test →](12-dev-gen-test.md)
 
 # 10 · `/review-code` — Review code (read-only, 4 dimension)
 

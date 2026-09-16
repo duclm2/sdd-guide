@@ -44,7 +44,7 @@ Mọi command sau đều đọc `project-context.yaml` + `CLAUDE.md` + `domain-k
 5. **Step 3 · project-context.yaml** — copy từ `templates/project-context.yaml`, điền `{{PLACEHOLDER}}`. Umbrella: verify/sửa `services` (path phải khớp tên submodule thật — generator để placeholder `TODO-…`).
 6. **Step 4 · business-dictionary.md** — Canonical Terms / Banned Terms / Enum Registry. *(Umbrella skip — sống trong spec submodule.)*
 7. **Step 5 · core-entities.md** — entity catalog máy-đọc-được (field, invariant, relationship). *(Umbrella skip.)*
-8. **Step 6 · VS Code extension** — khuyến nghị cài "Spec Driven Docs Tools" (Review Board + Living Docs UI).
+8. **Step 6 · VS Code extension** — khuyến nghị cài "SDD Board" (Review Board + Living Docs UI).
 9. **Step 7 · Verify** — checklist theo `project_type` (file/folder tồn tại; umbrella check submodule init).
 
 ---

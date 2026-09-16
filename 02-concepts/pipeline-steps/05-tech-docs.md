@@ -3,14 +3,14 @@
 # Bước 5 · Tech-Docs — Thiết kế kỹ thuật (Technical Design)
 
 > **Tóm tắt.** Từ BDD `approved`, sinh **một tech-design full-stack gộp cho cả PRD** — API contract, entity, data, dependency — rồi review đa chiều + **cổng ký liên team** cho contract cross-service.
-> **Commands:** `/generate-tech-docs` → `/review-tech-docs`
+> **Commands:** `/generate-tech-docs` → `/map-testids` → `/review-tech-docs`
 
 | | |
 |---|---|
 | **Giai đoạn** | Design (đầu ra kỹ thuật) |
 | **Owner** | 👤 SA / Tech Lead |
 | **Đầu vào** | BDD `approved` + entity catalog + CLAUDE.md |
-| **Đầu ra** | `tech-docs/{TICKET-ID}-tech-design.md` (một doc full-stack/PRD) |
+| **Đầu ra** | `tech-docs/{TICKET-ID}-tech-design.md` (một doc full-stack/PRD) + **hợp đồng test-id** (`@trace.testid_attr` ở header · §4.5.6 Test Selectors) |
 | **HITL** | 🟠 Vừa — review đa chiều + cổng ký T7 cho contract liên team |
 
 ---
@@ -38,7 +38,8 @@
 | Artifact | Nội dung |
 |----------|----------|
 | `specs/{domain}/{prd-slug}/tech-docs/{TICKET-ID}-tech-design.md` | **Một doc full-stack** phủ mọi UC: API endpoint, DTO, data model, DB, dependency, §10 UC Coverage |
-| `@trace.status: approved` | 🔒 Mở khoá `/generate-code` |
+| `@trace.testid_attr` (header) + **§4.5.6 Test Selectors** | **Hợp đồng test-id giữa FE và QC** — do `/map-testids` ghi. Header giữ **TÊN thuộc tính** (một giá trị cho cả doc); §4.5.6 giữ **GIÁ TRỊ** test-id từng element + cột *Serves SC* |
+| `@trace.status: approved` | 🔒 Mở khoá `/generate-code` **và** `/qc-design-test` — hai nhánh chạy song song |
 | (Tuỳ chọn) System BDD | Cho dependency cross-service |
 
 > Contract này là **artifact liên team**: BE viết → FE/App đọc ở `/generate-code --phase=integration`. Trong umbrella, nó nằm ở **spec repo dùng chung**.
@@ -72,10 +73,20 @@
 3. Nếu API đã tồn tại → **reverse-document** (mô tả as-is, không tự chế shape).
 4. Chuẩn hoá entity/DTO/endpoint theo catalog để nhất quán với PRD/BDD.
 
+**`/map-testids`** — chốt **hợp đồng test-id** trước khi có dòng code nào:
+1. Ghi `@trace.testid_attr` ở header — **tên** thuộc tính của stack client (`data-testid` · `data-test` · `testID` · `Key`…), **một** giá trị cho cả doc.
+2. Ghi **§4.5.6 Test Selectors** — **giá trị** test-id từng element, kèm cột **Serves SC (UC · SC)** làm chỉ mục ngược.
+3. Nếu §4.5.6 đã có dòng cũ và giá trị mới **lệch** → **DỪNG, không ghi đè**, in cả hai bản cho người quyết.
+4. Ghi lại §4.5.6 làm **mất hiệu lực** kết quả QC cũ: `qc_status` → `not_run`, `qc_run_at` → `—` *(không đụng `qc_owner`/`qc_blocked_by`)*. Test-script bám selector cũ đã không còn đúng — để nguyên `pass` là nói dối.
+5. `--from-code` là chế độ **ngược**, dùng cho brownfield: đọc test-id đã có trong code UI rồi ghi ngược vào doc.
+
+> **Vì sao lệnh này nằm ở đây chứ không sau `/generate-code`.** Chốt hợp đồng **trước** code thì FE (gắn attribute) và QC (viết test case + script) đọc **cùng một bản đã đóng băng** và **chạy song song**. Chốt sau code thì QC phải ngồi chờ, rồi tự dò selector từ DOM — script giòn, dev đổi một class là vỡ, và **không ai báo**.
+
 **`/review-tech-docs`** — review **đa chiều**, findings gom theo từng UC (đọc §10 UC Coverage):
 - Kiểm tính đủ/đúng của contract, entity, error, dependency.
 - **T3 — BDD traceability**: design có khớp **nội dung** scenario không (2 chiều, match trong đúng lane platform).
 - **T3b — BDD freshness**: doc này dựng từ BDD **version nào**, BDD giờ ở version nào.
+- **T6 — hợp đồng test-id**: §4.5.6 rỗng, hoặc header thiếu `@trace.testid_attr` → **Major**, và **không tự sửa được** (phải chạy `/map-testids`). Đây là cổng giữ cho hợp đồng không bị bỏ trống rồi trôi xuống `/generate-code`.
 - **T7 — cổng ký liên team**: contract cross-service phải được các team liên quan **ký** trước khi code.
 
 ### T3b — vì sao độ tươi cần một cổng riêng
@@ -108,11 +119,16 @@ Header tech-doc mang `@trace.bdd_versions` — **map theo platform** (`system=1.
 - ❌ Tự "chế" shape DTO/endpoint khi API đã tồn tại — phải reverse-document as-is.
 - ❌ Bỏ cổng ký T7 rồi để hai team hiểu contract khác nhau → rework tốn kém.
 - ❌ Sinh code khi tech-design còn `draft` với contract chưa chốt.
+- ❌ Bỏ qua `/map-testids` rồi để `/generate-code` **tự bịa** test-id — QC không có hợp đồng để bám, phải dò DOM.
+- ❌ Ghi đè §4.5.6 khi giá trị lệch bản cũ — làm vỡ test-script đang chạy mà không ai biết.
 
 ---
 
 ## Bước tiếp theo (Next step)
 
-Tech-design `approved` (+ ký T7) → sinh code:
+Tech-design `approved` (+ ký T7 + §4.5.6 đã chốt) → **rẽ hai nhánh chạy song song**:
 
-➡️ [Bước 6 · Code — `/generate-code`](06-code.md)
+➡️ [Bước 6 · Code — `/generate-code`](06-code.md) — FE gắn `@trace.testid_attr` lên element theo §4.5.6
+➡️ [Bước 8 · QC Automation — `/qc-design-test`](08-qc-automation.md) — QC dựng test case + script theo **cùng** §4.5.6
+
+Hai nhánh **không dẫm chân nhau** vì cả hai đọc một hợp đồng đã đóng băng, không bên nào tự đặt test-id.

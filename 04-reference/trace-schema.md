@@ -17,7 +17,7 @@
 | Tag | Ý nghĩa | Bắt buộc |
 |-----|---------|:--------:|
 | `@trace.id` | UC-ID — `{TICKET-ID}-UC{N}` (vd `SEG01-UC1`) | ✅ |
-| `@trace.platform` | `web` / `app` / `system` — **mọi mode, kể cả umbrella** | ✅ |
+| `@trace.platform` | `web` / `app` / `system` / `webview` — **mọi mode, kể cả umbrella**. Đây là **delivery surface**, không phải tech stack: `webview` (bundle web nhúng trong app native — Phaser game, mini-app) là surface riêng, không phải `web` (browser) cũng không phải `app` (native) | ✅ |
 | `@trace.domain` | Domain nghiệp vụ | ✅ |
 | `@trace.prd` | TICKET-ID của PRD nguồn | ✅ |
 | `@trace.prd_version` | Version PRD lúc sinh BDD | ✅ |
@@ -94,6 +94,44 @@ public ScoreDto calculate(...) { }
 | `@trace.revision` | integer, bump mỗi lần sửa — nguồn của `TECHDOC_DRIFT` |
 | `@trace.status` | `draft` / `in-review` / `approved` — cổng của `/generate-code` DS3 |
 | `@trace.api_source` | `existing` → chế độ reverse-document, bỏ cổng T7 |
+| `@trace.testid_attr` | **TÊN THUỘC TÍNH** chứa test-id (`data-testid` · `data-test` · `testID` · `ValueKey`…) — **một** giá trị cho cả doc. Khác **GIÁ TRỊ** test-id từng element, cái đó ở §4.5.6. Ghi bởi `/map-testids`; đọc bởi `/generate-code` (emit lên element) và các lệnh `qc-*` (cấu hình locator). |
+
+### Hợp đồng test-id — được máy canh (`testid_contract`)
+
+Bảng **§4.5.6 Test Selectors** trong tech-doc là hợp đồng FE↔QC: **3 lệnh đọc**
+(`generate-code`, `qc-design-script`, `qc-design-test`), **2 lệnh ghi** (`generate-tech-docs`,
+`map-testids`). Hai rule của `lint-trace` canh nó:
+
+| Rule | Kiểm gì | Mức |
+|---|---|:---:|
+| **T15** | Mọi SC ở cột *"Serves SC"* phải có thật trong `.feature` của nền đó | 🔴 error |
+| **T16** | Có block §4.5 (nền client) mà header thiếu hẳn `@trace.testid_attr` | 🔴 error |
+| | …có nhưng còn ở dạng placeholder `{…}` (chưa chạy `/map-testids`) | ⚠️ warn |
+| **T17** | Id đã khai ở §4.5.6 mà **không có trong code** — FE chưa gắn / gắn sai / element đã đổi *(cần `--code`)* | ⚠️ warn |
+| **T18** | Id nằm trong code mà **không có trong §4.5.6 nào** — gắn ngoài hợp đồng *(cần `--code`)* | ⚠️ warn |
+
+> **T17/T18 là WARN, không ERROR.** Id đoán từ thiết kế không sống sót 100%: lúc implement, dev
+> có thể gộp hai element thành một component hoặc tách một thành hai. Đây là **nợ cần thấy**,
+> không phải cái sai chặn người.
+>
+> T18 là **lưới bắt phía sau** cho quyết định ở `/generate-code`: khi §4.5.6 rỗng, lệnh đó cảnh
+> báo rồi **để người quyết** thay vì chặn cứng — chính vì có T18 bắt những id tạm sinh ra ở đó,
+> nên "vẫn sinh" không tạo nợ vô hình.
+>
+> Thiếu `--code` → in `T17/T18 BỎ QUA` tường minh, **không im lặng báo sạch**. Code chưa có id
+> nào của thuộc tính đó (UI chưa viết) → im lặng, không phán "FE chưa gắn" cho cả bảng.
+
+> **Phạm vi neo vào sự tồn tại của hợp đồng.** Doc không có §4.5 client → **không kiểm gì**.
+> Dự án backend-only, hay dự án chưa từng chạy `/map-testids`, im lặng hoàn toàn. Hai rule nói
+> *"chỗ nào đã hứa thì phải giữ"*, không nói *"mọi chỗ đều phải có hợp đồng"*. Dòng mẫu của
+> template (còn `{…}`) cũng được bỏ qua — nếu không thì tech-doc vừa sinh ra đã đỏ.
+>
+> **Không vào `gate.blocking`** — đây là nợ cần thấy, không phải cái sai chặn PR. Cùng nhóm với
+> `TECHDOC_DRIFT` / `BDD_DRIFT`; 13/17 cờ audit hiện tại cũng không chặn.
+
+Khối `testid_contract` trong `bin/trace-schema.json` khai hai rule này kèm `why`, và
+`self-check` **R8e** báo lỗi nếu `lint-trace.js` không thực sự phát ra chúng — nửa *"máy canh"*
+của luật *"khai tường minh + để máy canh"*.
 
 ---
 
@@ -124,10 +162,10 @@ Shared code dò qua **import chain** từ boundary → tránh tag explosion.
 | 7 | `test_classes` | tên test class / describe | dev-gen-test · fix-bug |
 | 8 | `dev_selftest` | `pass`/`fail`/`not_run` — **dev tự chạy** | **chủ:** dev-run-test · *hạ hiệu lực:* generate-bdd · generate-code · fix-bug |
 | 9 | `dev_selftest_at` | ngày | như trên |
-| 10 | `qc_status` | `pass`/`fail`/`skip`/`not_run` — **QC chính thức** | **chủ:** qc-run-test · *hạ hiệu lực:* generate-bdd · generate-code |
+| 10 | `qc_status` | `pass`/`fail`/`skip`/`not_run` — **QC chính thức** | **chủ:** qc-run-script + qc-run-manualtest · *hạ hiệu lực:* generate-bdd · generate-code |
 | 11 | `qc_run_at` | ngày | như trên |
-| 12 | `qc_owner` | SC đang chờ ai: `dev` / `po` | qc-run-test · report-bug |
-| 13 | `qc_blocked_by` | `BUG-{id}` / `GAP-{id}` | qc-run-test · report-bug |
+| 12 | `qc_owner` | SC đang chờ ai: `dev` / `po` | qc-run-script · qc-run-manualtest · report-bug |
+| 13 | `qc_blocked_by` | `BUG-{id}` / `GAP-{id}` | qc-run-script · qc-run-manualtest · report-bug |
 | 14 | `prd_version` | version PRD lúc sinh BDD | generate-bdd |
 | 15 | `bdd_version` | version `.feature` | generate-bdd · review-context |
 | 16 | `tech_doc_revision` | `@trace.revision` của tech-doc | generate-code · review-tech-docs |
@@ -193,6 +231,8 @@ Shared code dò qua **import chain** từ boundary → tránh tag explosion.
 >
 > ⓘ = **không phải lỗi.** Hai cờ `*_STALE_REF` tồn tại vì version PRD/tech-doc là **MỘT số cho cả tài liệu nhiều UC** — thêm một UC làm mọi UC cũ lệch số dù không đổi một chữ. Không lọc thì cả loạt UC ăn cờ đỏ oan, và làm theo hướng dẫn cũng không tắt được (`/generate-code` skip row đang `OK`). Sạch bằng `--realign-*`: chỉ sửa dòng `@trace.*`, **không đụng logic**, và **từ chối chạy** nếu UC đó đang thật sự `DRIFT`/`ORPHANED`.
 >
+> **Không kiểm được ≠ sạch.** `lint-trace` **T13** phát khi không hỏi được `git` (image CI thiếu git, hoặc sổ ngoài repo) — và `gate-trace` G0 **fail**, thay vì khẳng định `sổ được bảo vệ — 2/2 điều kiện` trên bằng chứng chưa bao giờ thu. Cùng nguyên tắc `spec_edit_detection.degraded`: *không bịa cờ, và không im lặng*.
+
 > **Mọi cờ đều PHẢI có counter `{flag}_count`** trong Step 7 + `summary` của `trace-report.json` — `bin/self-check.js` R7 ép, không có ngoại lệ. Thiếu counter = cờ vô hình với dashboard.
 
 ---
@@ -238,7 +278,7 @@ Ca thứ hai là lý do consumer **phải** chuẩn hoá tập bị ảnh hưở
 
 ## Xuất JSON cho panel
 
-`trace-report.json` giữ enum `status` **đúng 4 giá trị** `OK`/`DRIFT`/`GAP`/`UNTRACKED` — VS Code extension "Spec Driven Docs Tools" sống ngoài repo framework và switch trên field này. Row `ORPHANED` xuất ra là `"status": "DRIFT"` + `"orphaned": true`; panel cũ hiện nó như DRIFT (đúng nghĩa, không im lặng), panel mới đọc `orphaned` để hiện nhãn riêng. **TSV giữ nguyên chữ `ORPHANED`** — TSV là nguồn-sự-thật.
+`trace-report.json` giữ enum `status` **đúng 4 giá trị** `OK`/`DRIFT`/`GAP`/`UNTRACKED` — VS Code extension "SDD Board" sống ngoài repo framework và switch trên field này. Row `ORPHANED` xuất ra là `"status": "DRIFT"` + `"orphaned": true`; panel cũ hiện nó như DRIFT (đúng nghĩa, không im lặng), panel mới đọc `orphaned` để hiện nhãn riêng. **TSV giữ nguyên chữ `ORPHANED`** — TSV là nguồn-sự-thật.
 
 ---
 

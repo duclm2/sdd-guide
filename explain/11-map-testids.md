@@ -1,4 +1,6 @@
-[← /review-code](10-review-code.md) · [Explain Home](README.md) · [Next: /dev-gen-test →](12-dev-gen-test.md)
+[← /generate-tech-docs](07-generate-tech-docs.md) · [Explain Home](README.md) · [Next: /review-tech-docs →](08-review-tech-docs.md)
+
+> **Số `11` là số file lịch sử, không phải thứ tự chạy.** Lệnh này chạy ở **Phase Design**, giữa `/generate-tech-docs` và `/review-tech-docs` — tức **trước** `/generate-code`. Giữ nguyên tên file để không gãy link cũ.
 
 # 11 · `/map-testids` — Dán test-id ổn định cho UI (FE)
 
@@ -14,16 +16,17 @@ Test tự động (Playwright) vỡ khi selector đổi (class/text thay đổi)
 
 ## Vị trí & tiền đề
 
-- **Vị trí:** Phase Tech Design / Implementation (FE), giữa code FE và QC.
+- **Vị trí:** Phase **Tech Design**, sau `/generate-tech-docs` và **TRƯỚC** `/review-tech-docs` — tức trước cả `/generate-code`. Chốt hợp đồng test-id ở đây để FE và QC đọc cùng một bản đã đóng băng rồi **chạy song song**.
+- **Hai chế độ:** mặc định (feature mới — nguồn là design-spec + BDD, **không đụng code**) · `--from-code` (brownfield — đọc/patch code đã có, chạy một lần mỗi UC cũ).
 - **Chặn cứng:** chỉ FE/App (platform guard) — BE không có UI.
 
 ---
 
 ## Input / Output
 
-**Input:** UI code FE (element có action) + catalog component tái dùng + tech-doc §4.5.
+**Input:** design-spec (Component Inventory, màn hình) + step `When` của `.feature` FE + tech-doc §4.5.1 (cây component) + catalog component tái dùng. *Chế độ `--from-code` đọc thêm UI code FE.*
 
-**Output:** code FE được patch test-id + map §4.5.6 Test Selectors trong tech-doc.
+**Output:** map §4.5.6 Test Selectors + `@trace.testid_attr` ở header tech-doc. *Chế độ `--from-code` còn patch test-id vào code FE.*
 
 ---
 
@@ -57,13 +60,13 @@ Test tự động (Playwright) vỡ khi selector đổi (class/text thay đổi)
 
 ## 👓 Góc nhìn tối ưu
 
-- **Lệnh cầu nối FE→QC** — vị trí pipeline hơi mờ (giữa Tech Design & Code). Chạy sớm quá thì UI chưa xong, muộn quá thì QC phải chờ. Đáng làm rõ thời điểm tối ưu.
+- **Lệnh chốt hợp đồng FE↔QC** — vị trí **đã được chốt**: phase Tech Design, trước `/generate-code`. Trước đây vị trí mờ (tài liệu này từng nói 'giữa Tech Design & Code') nên lệnh hay bị bỏ qua; giờ `/generate-tech-docs` trỏ thẳng sang đây, và `/review-tech-docs` T6 không cho APPROVED nếu §4.5.6 rỗng.
 - **Phụ thuộc catalog component tái dùng** — nếu component không forward được prop test-id, Step 3 phát sinh sửa lan rộng.
 - **EXTEND-only** an toàn nhưng nếu test-id cũ sai thì không tự sửa.
-- **Không bắt buộc trong golden path** — dễ bị bỏ qua, khiến QC selector giòn. Cân nhắc tích hợp vào `/generate-code --phase=ui`.
+- **Đã vào golden path** — `/generate-tech-docs` → **`/map-testids`** → `/review-tech-docs` (T6 chặn nếu §4.5.6 rỗng). `lint-trace` T15/T16 canh bảng, T17/T18 canh bảng-vs-code.
 
 ---
 
 ## Kết nối
 
-**Trước:** [`/generate-code`](09-generate-code.md) (UI FE) · **Sau:** [`/qc-*`](15-qc-analyze.md) dùng selector đã map.
+**Trước:** [`/generate-tech-docs`](07-generate-tech-docs.md) · **Sau:** [`/review-tech-docs`](08-review-tech-docs.md), rồi rẽ hai nhánh song song — [`/generate-code`](09-generate-code.md) (FE gắn attribute) ∥ [`/qc-design-test`](17-qc-design-test.md) (QC dựng test theo cùng hợp đồng).

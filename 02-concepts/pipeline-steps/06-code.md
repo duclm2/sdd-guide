@@ -30,6 +30,7 @@ Code là **hệ quả của spec, không phải nguồn**. Bước này biến s
 
 - **`.feature approved`** (hoặc UC-ID) — target.
 - **Tech-design** `approved` (§4 làm nguồn contract cho shape DTO/endpoint/error).
+- **Hợp đồng test-id** — `@trace.testid_attr` ở header (**tên** thuộc tính) + **§4.5.6 Test Selectors** (**giá trị** test-id). Do [`/map-testids`](05-tech-docs.md) chốt ở bước 5. Code **đọc** hợp đồng này, **không** tự đặt test-id.
 - `CLAUDE.md` §2 (thứ tự layer, package strategy) + §3 (coding standards) + §5 (error handling) — **service overlay thắng**.
 - `.trace/{domain}/{prd-slug}/{UC-ID}-{platform}.tsv` — để so drift.
 
@@ -87,8 +88,16 @@ public TokenDto login(...) { }
 2. 🛑 **Comprehension checkpoint** (mềm): *"{X} new, {Y} drifted, {Z} synced-skip — Proceed?"* → tránh AI hiểu sai mà vẫn chạy.
 3. **Scope Lock** — chỉ implement UC target; code của UC khác trong file dùng chung là **bất khả xâm phạm** (đọc `@trace.implements` để bảo toàn, không xoá).
 4. **Generate** theo **thứ tự layer** (vd Controller → Facade → Service → Repository) từ CLAUDE.md §2; tag `@trace` chỉ ở **boundary** (controller/handler), shared code dò qua import chain.
-5. **Build verify** — chạy `{conventions.build_command}`, ≤3 retry.
-6. **Ghi trace row** vào `.tsv` (trong spec repo nếu umbrella — thao tác ghi liên-repo).
+5. **Gắn test-id theo hợp đồng** — đọc `@trace.testid_attr` ở header tech-doc để biết gắn **thuộc tính nào**, đọc §4.5.6 để biết gắn **giá trị nào** lên element nào:
+
+   | Tình huống | Hành vi |
+   |---|---|
+   | §4.5.6 **rỗng** | ⚠️ **Cảnh báo mạnh rồi hỏi Y/N** — không tự bịa test-id. Đường đúng là dừng lại chạy `/map-testids`; tiếp tục là quyết định của dev, có ghi nhận |
+   | Header **không có** `@trace.testid_attr` | Cảnh báo mềm nêu rõ rủi ro → fallback theo platform. Không im lặng hardcode |
+   | `.feature` cũng khai attr và **lệch** header | In **cả hai** giá trị, để người quyết |
+
+6. **Build verify** — chạy `{conventions.build_command}`, ≤3 retry.
+7. **Ghi trace row** vào `.tsv` (trong spec repo nếu umbrella — thao tác ghi liên-repo).
 
 **Mode theo phase × platform:**
 | Mode | Ý nghĩa |
@@ -143,6 +152,7 @@ public TokenDto login(...) { }
 - ❌ Tái tạo file dùng chung "chỉ gồm scenario UC này" → xoá nhầm nghiệp vụ UC khác.
 - ❌ Tag `@trace` mọi file → tag explosion; chỉ tag boundary.
 - ❌ Lưu version trong code — version chỉ ở spec; code dùng `.tsv`.
+- ❌ **Tự đặt test-id** khi §4.5.6 rỗng — QC đang viết script theo hợp đồng đó song song; code bịa một bộ id khác là làm vỡ script mà không ai báo.
 
 ---
 

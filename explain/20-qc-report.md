@@ -1,4 +1,4 @@
-[← /qc-run-test](19-qc-run-test.md) · [Explain Home](README.md) · [Next: /validate-traces →](21-validate-traces.md)
+[← ba trạm script](19-qc-run-test.md) · [Explain Home](README.md) · [Next: /validate-traces →](21-validate-traces.md)
 
 # 20 · `/qc-report` — Trạm 6: Report + evidence + product-gap
 
@@ -14,7 +14,7 @@ Kết quả chạy cần được trình bày có bằng chứng và **định t
 
 ## Vị trí & tiền đề
 
-- **Vị trí:** Phase QC (trạm 6, cuối), sau `/qc-run-test`.
+- **Vị trí:** Phase QC (trạm 6, cuối), sau `/qc-run-script` và `/qc-run-manualtest`.
 
 ---
 
@@ -30,8 +30,11 @@ Kết quả chạy cần được trình bày có bằng chứng và **định t
 
 1. **Role qa-runner/report** — nạp skill report.
 2. **Procedure** — tổng hợp kết quả run (pass/fail per SC), đính evidence.
-3. Tách **product-gap** → định tuyến về PO/Dev (có thể thành `/report-bug`).
-4. **Output** report.
+3. Tách **product-gap** → định tuyến về PO/Dev (có thể thành `/report-bug`). Scenario mang nhãn **`flaky`** **không** thành bug — nó là *chưa có kết luận*, `qc_status` để `not_run`.
+4. **Self-Review** *(mới)* — nạp `skills/qc/_shared/self-review-principles.md`, soát một lượt trước khi in report.
+5. **Output** report.
+> **Self-Review ≠ Guard.** Guard là phép **đếm cơ học**, có hệ quả bắt buộc khi lệch. Self-review là lượt đọc lại **rộng hơn nhưng mềm hơn**, soát ba nhóm lỗi mà phép đếm không bắt được (bịa dữ kiện · lẫn suy đoán với sự thật · bỏ dở giữa chừng). Một bộ nguyên tắc tự soát **không bao giờ** được dùng làm lý do gỡ một Guard — chính file `self-review-principles.md` ghi rõ ranh giới đó ngay ở đầu.
+
 
 ---
 
@@ -58,4 +61,4 @@ Kết quả chạy cần được trình bày có bằng chứng và **định t
 
 ## Kết nối
 
-**Trước:** [`/qc-run-test`](19-qc-run-test.md) · **Sau:** [`/validate-traces`](21-validate-traces.md) (làm mới Living Docs); product-gap → [`/report-bug`](25-report-bug.md).
+**Trước:** [ba trạm script](19-qc-run-test.md) · **Sau:** [`/validate-traces`](21-validate-traces.md) (làm mới Living Docs); product-gap → [`/report-bug`](25-report-bug.md).

@@ -2,7 +2,7 @@
 
 # 06 · `/generate-bdd` — Sinh kịch bản BDD (.feature)
 
-> **Một câu.** Phân rã PRD thành các file `.feature` (Gherkin) mang `@trace.*`, theo platform (web/app/system), với fan-out per-UC và tổng hợp **System BDD** từ BDD FE/App.
+> **Một câu.** Phân rã PRD thành các file `.feature` (Gherkin) mang `@trace.*`, theo platform (web/app/webview/system), với fan-out per-UC và tổng hợp **System BDD** từ BDD FE/App.
 
 ---
 

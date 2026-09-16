@@ -25,7 +25,7 @@ Trước khi đẩy sang QC chính thức, Dev cần một vòng **kiểm nhanh 
 
 > **`dev_selftest` ≠ `qc_status`.** Hai trục **độc lập**: dev smoke (nhanh, tự kiểm) vs QC chính thức (Playwright, evidence). Không lấn quyền nhau.
 >
-> ⚠️ **Nhưng "độc lập" chỉ đúng với `status` về KẾT QUẢ CHẠY, không đúng về QUYỀN KHẲNG ĐỊNH** *(GAPS-v4 G55)*. `pass` mang nghĩa *"scenario này đã được nghiệm thu theo spec **hiện tại**"* — nên trên row `DRIFT`/`ORPHANED`, `/dev-run-test` và `/qc-run-test` **không được** ghi `pass`; chúng hạ về `not_run`. `fail`/`skip` thì ghi bình thường. `lint-trace` **T12** bắt trạng thái `DRIFT + pass` ở sổ thật, bất kể ai ghi ra.
+> ⚠️ **Nhưng "độc lập" chỉ đúng với `status` về KẾT QUẢ CHẠY, không đúng về QUYỀN KHẲNG ĐỊNH** *(GAPS-v4 G55)*. `pass` mang nghĩa *"scenario này đã được nghiệm thu theo spec **hiện tại**"* — nên trên row `DRIFT`/`ORPHANED`, `/dev-run-test` và `/qc-run-script` và `/qc-run-manualtest` **không được** ghi `pass`; chúng hạ về `not_run`. `fail`/`skip` thì ghi bình thường. `lint-trace` **T12** bắt trạng thái `DRIFT + pass` ở sổ thật, bất kể ai ghi ra.
 
 ---
 

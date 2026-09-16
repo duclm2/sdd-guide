@@ -14,14 +14,15 @@ Code là **hệ quả của spec**. Command biến scenario thành code sao cho:
 
 ## Vị trí & tiền đề
 
-- **Vị trí:** Phase Implementation, sau BDD + tech-docs.
+- **Vị trí:** Phase Implementation, sau BDD + tech-docs + [`/map-testids`](11-map-testids.md).
+- **Chạy song song với QC.** Hợp đồng test-id (§4.5.6) đã đóng băng trước bước này, nên FE gắn attribute còn QC dựng test **cùng lúc** trên cùng một bảng — không bên nào chờ bên nào, không bên nào tự đặt id.
 - **Gate vào:** cảnh báo mềm DS1 (BDD chưa approved), DS2 (design-spec), DS3 (tech-doc contract BE), **DS4** (client contract §4.5.4) + **DS5** (FE reuse gate) — DS4/DS5 chỉ khi wire API thật (`integration`/`fe_full`). Xem [Hành vi theo mode](#hành-vi-theo-mode-phase--platform).
 
 ---
 
 ## Input / Output
 
-**Input:** `.feature` (hoặc UC-ID) + tech-design §4 + CLAUDE.md §2/§3/§5 + `.trace/…/{UC-ID}-{platform}.tsv` + `_seams.tsv`.
+**Input:** `.feature` (hoặc UC-ID) + tech-design §4 + **hợp đồng test-id** (`@trace.testid_attr` ở header + §4.5.6 Test Selectors) + CLAUDE.md §2/§3/§5 + `.trace/…/{UC-ID}-{platform}.tsv` + `_seams.tsv`.
 
 **Output:** file code (tag `@trace` boundary) + trace row `.tsv` + cập nhật `_seams.tsv`.
 
@@ -64,7 +65,7 @@ Code là **hệ quả của spec**. Command biến scenario thành code sao cho:
 | **DS4** — client contract gate (§4.5.4) | ⏭️ cố ý | ✅ | ✅ | — |
 | **DS5** — FE component/service reuse gate | ⏭️ | ✅ | ✅ | — |
 | **Sinh UI** (Figma MCP, component, state) | ✅ | ⏭️ giữ UI cũ | ✅ | — |
-| **Test Selectors** (emit test-id) | ✅ | ⏭️ | ✅ | — |
+| **Test Selectors** (**đọc** §4.5.6 rồi emit, xem dưới) | ✅ | ⏭️ | ✅ | — |
 | **Mock API Layer** | ✅ | ⏭️ | ⏭️ | — |
 | **Integration Phase** (real API adapter) | ⏭️ | ✅ | ✅ | — |
 | **Wire-up API** | dùng **mock** | **lật** mock→real | wire **thẳng** real | — (BE là API) |
@@ -80,6 +81,29 @@ Code là **hệ quả của spec**. Command biến scenario thành code sao cho:
 - **Mock API Layer** là thứ **duy nhất** riêng `--phase=ui`.
 - **Sinh UI** có ở `ui` và `fe_full`, **không** ở `integration` (giả định UI đã có từ pha ui).
 - **`fe_full` = `ui` + `integration`** gộp một lần (bỏ mock), nhưng **vẫn giữ safety gate DS4** — không phải đường tắt kém an toàn.
+
+---
+
+### Test Selectors — ĐỌC hợp đồng, không tự đặt *(đổi ở đợt sửa hợp đồng test-id)*
+
+Trước đây lệnh này **tự sinh** test-id khi §4.5.6 rỗng. Đó là lỗi **im lặng**: QC đang viết script theo một bảng khác (hoặc không có bảng nào), và không ai báo cho ai.
+
+**Giá trị** test-id lấy từ §4.5.6:
+
+| Tình huống | Hành vi |
+|---|---|
+| §4.5.6 **có dòng** | Dùng đúng giá trị trong bảng |
+| §4.5.6 **rỗng** | ⚠️ **Cảnh báo mạnh rồi hỏi Y/N.** Đường đúng là dừng, chạy `/map-testids`. Tiếp tục là **quyết định của dev**, không phải mặc định của máy |
+
+**Tên thuộc tính** lấy từ `@trace.testid_attr` ở header tech-doc:
+
+| Tình huống | Hành vi |
+|---|---|
+| Header có field | Dùng đúng tên đó (`data-testid` · `data-test` · `testID` · `Key`…) |
+| Header **không có** | Cảnh báo mềm **nêu rõ rủi ro** → fallback theo `active_module`. Không im lặng hardcode |
+| `.feature` cũng khai attr và **lệch** header | In **cả hai** giá trị, để người quyết. Không tự chọn bên nào |
+
+> **Vì sao không suy từ platform cho nhanh:** suy từ platform là **phát biểu lại một sự thật đã ghi ở nơi khác**. Nó hỏng đúng ở ca field này sinh ra để phục vụ — web dùng `data-test`/`data-qa` thay vì mặc định, hoặc một PRD trải ba platform với ba thuộc tính khác nhau. Và nó hỏng **im lặng theo kiểu tệ nhất**: test fail `element not found`, trông y hệt một bug sản phẩm, nên QC đi mở bug thay vì sửa selector.
 
 ---
 
@@ -113,4 +137,6 @@ Code là **hệ quả của spec**. Command biến scenario thành code sao cho:
 
 ## Kết nối
 
-**Trước:** [`/review-tech-docs`](08-review-tech-docs.md) · **Sau:** lần đầu → [`/review-code`](10-review-code.md); gen lại → [`/dev-gen-test`](12-dev-gen-test.md).
+**Trước:** [`/map-testids`](11-map-testids.md) → [`/review-tech-docs`](08-review-tech-docs.md) · **Song song:** [`/qc-design-test`](17-qc-design-test.md) · **Sau:** lần đầu → [`/review-code`](10-review-code.md); gen lại → [`/dev-gen-test`](12-dev-gen-test.md).
+
+> Test-id sinh ra **không khớp code thật** → sửa bằng `/map-testids --from-code`, đừng sửa tay bảng. Lệnh đó tự hạ `qc_status` → `not_run` và `qc_run_at` → `—`, để QC biết test-script bám selector cũ đã hết hiệu lực.

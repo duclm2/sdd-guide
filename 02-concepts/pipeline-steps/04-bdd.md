@@ -139,4 +139,4 @@ Scenario: Đặt lại mật khẩu với link còn hạn
 
 BDD `approved` → thiết kế kỹ thuật:
 
-➡️ [Bước 5 · Tech-Docs — `/generate-tech-docs` · `/review-tech-docs`](05-tech-docs.md)
+➡️ [Bước 5 · Tech-Docs — `/generate-tech-docs` · `/map-testids` · `/review-tech-docs`](05-tech-docs.md)

@@ -35,7 +35,7 @@ Sửa bug ad-hoc dễ tái phát và mất truy vết. Command áp một quy tr�
 4. **Phase 4 · Regression Test** — thêm test tái hiện bug để chống tái phát.
 5. **Phase 4.5 · Cập nhật sổ trace** — regression test phải hiện lên coverage (xem dưới).
 6. **Phase 5 · Build & Commit** — build verify; umbrella **push 2 tầng** (Tầng 1: fix branch trong service submodule nơi code sống; Tầng 2: umbrella pointer).
-7. **Phase 5.5 · Đặt `🟡 Fixed`** — nếu fix một `{BUG-ID}` đã file. **Không** đặt `Closed` — bước đó thuộc `/qc-run-test`.
+7. **Phase 5.5 · Đặt `🟡 Fixed`** — nếu fix một `{BUG-ID}` đã file. **Không** đặt `Closed` — bước đó thuộc `/qc-run-script`.
 8. **Phase 6 · Đề xuất Lesson** — nếu lỗi tái diễn → `capture-lesson` (L1–L5).
 
 ### Phase 4.5 — vì sao `/fix-bug` phải ghi sổ trace
@@ -49,7 +49,7 @@ Sửa bug ad-hoc dễ tái phát và mất truy vết. Command áp một quy tr�
 | `dev_selftest` → `not_run` · `dev_selftest_at` → `—` | code vừa đổi nên tín hiệu self-test cũ hết hiệu lực |
 | `last_updated` | hôm nay |
 
-**Hai nhóm cột cấm đụng:** `qc_*` (QC sở hữu — `/qc-run-test` flip khi re-verify **và** chính nó đóng bug) · `spec_ver`/`gen_ver` (**fix bug không đổi spec** — đụng vào là tạo `DRIFT` giả).
+**Hai nhóm cột cấm đụng:** `qc_*` (QC sở hữu — `/qc-run-script` và `/qc-run-manualtest` flip khi re-verify; riêng `/qc-run-script` đóng bug) · `spec_ver`/`gen_ver` (**fix bug không đổi spec** — đụng vào là tạo `DRIFT` giả).
 
 Vì `dev_selftest` bị reset, Next của lệnh là **`/dev-run-test`** để lấy lại tín hiệu xanh, rồi mới tạo PR.
 

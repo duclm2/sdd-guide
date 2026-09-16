@@ -98,7 +98,7 @@ sprint thứ ba không ai làm.** Framework có hai lệnh CLI trả exit code �
 
 | Lệnh | Chặn gì | Đặt ở đâu |
 |---|---|---|
-| `--lint-trace` | **Cấu trúc sổ** (12 rule): header lệch · row sai số ô · enum sai · `sc_id` trùng · marker conflict git · `.jsonl` hỏng. Cộng **T12 — nhất quán GIỮA các ô**: row vừa `status ∈ {DRIFT, ORPHANED}` vừa mang `dev_selftest`/`qc_status = pass`. Cộng hai điều kiện **cấu hình** ở mức ⚠️: thiếu luật merge · sổ bị gitignore | pre-push **và** CI |
+| `--lint-trace` | **Cấu trúc sổ** (18 rule, T1–T18): header lệch · row sai số ô · enum sai · `sc_id` trùng · marker conflict git · `.jsonl` hỏng. Cộng **T12 — nhất quán GIỮA các ô**: row vừa `status ∈ {DRIFT, ORPHANED}` vừa mang `dev_selftest`/`qc_status = pass`. Cộng hai điều kiện **cấu hình** ở mức ⚠️: thiếu luật merge · sổ bị gitignore. Cộng **T15–T18 — hợp đồng test-id**: T15 bảng §4.5.6 trỏ tới SC **không có** trong `.feature` · T16 doc có §4.5 client mà header **thiếu** `@trace.testid_attr` · T17 id **khai mà code không có** · T18 id **code có mà bảng không khai** (T17/T18 cần `--code`). Bốn rule này chỉ nói **ở nơi hợp đồng tồn tại** — dự án backend-only hay dự án chưa từng chạy `/map-testids` thì im lặng hoàn toàn | pre-push **và** CI |
 | `--gate-trace` | **Cấu hình** (nâng hai ⚠️ trên thành chặn) + **cờ 🔴**: `ORPHANED` · `TRACE_ORPHAN` · `SEAM_UNWIRED` · `STUB_UNRESOLVED` | CI (cần report tươi) |
 
 ```bash
@@ -106,12 +106,13 @@ npx @educa-corp/sdd-framework --lint-trace     # exit 1 nếu sổ hỏng
 npx @educa-corp/sdd-framework --gate-trace     # exit 1 nếu có cờ 🔴
 ```
 
-Mẫu sẵn dùng: `.agent/templates/ci/trace-gate.yml` (GitHub Actions) · `.agent/templates/hooks/pre-push`.
+Mẫu sẵn dùng: `.agent/templates/ci/trace-gate.yml` (GitHub Actions) · `.agent/templates/ci/trace-gate.gitlab-ci.yml` (GitLab CI) · `.agent/templates/hooks/pre-push`.
 **Copy ra khỏi `.agent/`** trước khi dùng — mọi thứ trong đó bị ghi đè mỗi lần `/update-framework`.
 
 ### Bốn tầng của `--gate-trace`, và vì sao thứ tự đó
 
 0. **Sổ được bảo vệ?** — sổ có **nằm trong git**? git có **biết cách gộp** sổ? Kiểm cấu trúc của một quyển sổ sắp mất thì vô nghĩa. Hai điều kiện này `lint-trace` đã phát hiện dưới dạng ⚠️; gate **nâng** chúng thành lỗi chặn — *pre-push nhắc, CI chặn*.
+   **Và một điều kiện thứ ba: có kiểm được không?** (`T13`) — thiếu binary `git`, hoặc sổ ngoài mọi repo. Trước v0.7.2, ca này làm G0 in `✅ sổ được bảo vệ — 2/2 điều kiện` trên bằng chứng chưa bao giờ thu, vì G0 lọc warns theo rule id và không thấy gì thì kết luận *"sạch"* thay vì *"không biết"*. Ca thường gặp nhất là **image CI tối giản** — `node:*-alpine` và `node:*-slim` đều không có git, tức chính môi trường mà cổng này tồn tại để chạy.
 1. **Sổ đúng hình dạng?** (gọi `--lint-trace`) — phán trạng thái trên sổ lệch cột là phán trên dữ liệu rác.
 2. **Report còn tươi VÀ phủ toàn bộ?** — đối chiếu `trace-report.json` với chính sổ TSV nó khai
    là đang mô tả. Không có tầng này thì cổng là **sân khấu**: chạy `/validate-traces` một lần,
@@ -165,6 +166,6 @@ danh sách chặn.
 
 ## Lệnh của bạn (Your commands)
 
-`/generate-architecture` · `/generate-tech-docs` · `/review-tech-docs` · `/refine-prd` (SA lens) · `/review-code` · `/generate-spec-manifest`
+`/generate-architecture` · `/generate-tech-docs` · `/map-testids` · `/review-tech-docs` · `/refine-prd` (SA lens) · `/review-code` · `/generate-spec-manifest`
 
 → [Bảng lệnh đầy đủ](../04-reference/commands.md) · [Architecture](../02-concepts/architecture.md)

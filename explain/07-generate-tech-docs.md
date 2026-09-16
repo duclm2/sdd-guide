@@ -1,4 +1,4 @@
-[← /generate-bdd](06-generate-bdd.md) · [Explain Home](README.md) · [Next: /review-tech-docs →](08-review-tech-docs.md)
+[← /generate-bdd](06-generate-bdd.md) · [Explain Home](README.md) · [Next: /map-testids →](11-map-testids.md)
 
 # 07 · `/generate-tech-docs` — Sinh Technical Design (full-stack, gộp/PRD)
 
@@ -31,7 +31,9 @@
 
 1. **Bước 1 · Fresh vs Append** — chưa có doc → **FRESH**; đã có → **APPEND** (tăng dần, **không regenerate** để khỏi mất chỉnh tay + sign-off). Đọc §10 UC Coverage → `covered_ucs`; mỗi UC batch phân loại `add-new` / `extend-platform` / `refresh` (hỏi Y/N) / `skip`.
 2. **Bước 2 · Cổng Chất lượng** — mỗi feature: tìm `{uc-id}-{platform}-review-bdd-findings.yaml`; còn critical `pending` → **DỪNG** (chạy `--fix`/`--resume` trước); `@trace.status ≠ approved` → cảnh báo mềm Y/N.
-3. **Bước 3 · Điều kiện tiên quyết Client** (batch có web/app) — nạp design-spec cho §4.5 (component, Figma map, state, selector); thiếu → §4.5 degraded `[DRAFT — no design-spec]`.
+3. **Bước 3 · Điều kiện tiên quyết Client** (batch có web/app) — nạp design-spec cho §4.5 (component, Figma map, state); thiếu → §4.5 degraded `[DRAFT — no design-spec]`.
+
+   > **Lệnh này KHÔNG ghi §4.5.6 Test Selectors** *(đổi ở đợt sửa hợp đồng test-id)*. Nó dựng **khung** §4.5.6 rồi để trống — bảng đó do [`/map-testids`](11-map-testids.md) điền, và header `@trace.testid_attr` cũng vậy. Một bảng, **một** người ghi: hai lệnh cùng ghi một bảng thì bản nào thắng là chuyện may rủi, và không ai biết bản nào đang đúng.
 4. **Bước 4 · Brownfield** — `@trace.api_source: existing` → **reverse-document** (mô tả as-is, ghi gap vs BDD, không thiết kế mới); else **greenfield** (thiết kế từ scenario).
 5. **CHECKPOINT** — trình kế hoạch (mode, batch, platform, API mode, section sẽ sinh) → chờ Y.
 6. **Sinh** doc 12 section: §1 Overview · §2 Architecture · §3 Data Model · §4 API Contracts (+§4.5 client design) · §5 Key Flows (sequence, lane 5.A system/5.B web/5.C app) · §6 Integration · §7 Security · §8 Error Handling · §9 Design Decisions · **§10 UC Coverage** (khoá theo platform×SC) · §11 Cross-cutting · **§12 GAP Register** (ẩn số chưa chốt).
@@ -68,4 +70,4 @@
 
 ## Kết nối
 
-**Trước:** [`/generate-bdd`](06-generate-bdd.md) + [`/review-context {feature}`](04-review-context.md) · **Sau:** [`/review-tech-docs`](08-review-tech-docs.md).
+**Trước:** [`/generate-bdd`](06-generate-bdd.md) + [`/review-context {feature}`](04-review-context.md) · **Sau:** [`/map-testids`](11-map-testids.md) (chốt hợp đồng test-id) → [`/review-tech-docs`](08-review-tech-docs.md).

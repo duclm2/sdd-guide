@@ -10,7 +10,8 @@
 
 ```mermaid
 flowchart LR
-    R["/refine-prd · /review-context<br/>🟡 DEV lens"] --> G["/generate-code<br/>🟢 Lead"]
+    R["/refine-prd · /review-context<br/>🟡 DEV lens"] --> M["§4.5.6 đã chốt<br/>(/map-testids, bước 5)"]
+    M --> G["/generate-code<br/>🟢 Lead"]
     G --> RC["/review-code<br/>🟡 read-only"]
     RC --> T["/dev-gen-test → /dev-run-test<br/>🟢 Lead"]
     T --> S["/dev-smoke-test<br/>🟢"]
@@ -24,7 +25,7 @@ flowchart LR
 | Bước | Bạn làm gì |
 |------|-----------|
 | Review upstream | Lăng kính **DEV** trong `/refine-prd` — bắt chỗ mơ hồ khó hiện thực |
-| [Code](../02-concepts/pipeline-steps/06-code.md) | Chạy `/generate-code`; xác nhận **comprehension checkpoint** (drift new/drifted/synced); đảm bảo build pass |
+| [Code](../02-concepts/pipeline-steps/06-code.md) | Chạy `/generate-code`; xác nhận **comprehension checkpoint** (drift new/drifted/synced); đảm bảo build pass. **Gắn test-id theo §4.5.6 — không tự đặt** |
 | Review code | `/review-code` (read-only) — soát kỹ, **không auto-fix** |
 | [Dev self-test](../02-concepts/pipeline-steps/07-dev-selftest.md) | `/dev-gen-test` → `/dev-run-test` (set `dev_selftest`) → `/dev-smoke-test` |
 | [Bug fix](../02-concepts/pipeline-steps/10-feedback-loop.md) | `/fix-bug` — root cause → sửa → regression test |
@@ -38,6 +39,8 @@ flowchart LR
 3. **Scope Lock** — chỉ implement UC target; code UC khác trong file dùng chung là **bất khả xâm phạm**. Đọc `@trace.implements` để bảo toàn, đừng xoá.
 4. **Code CŨNG mang version** — `@trace.prd_version` · `@trace.bdd_version` · `@trace.tech_doc_revision` ghi *"tôi được sinh theo bản nào"*, còn spec giữ *"bản hiện tại"*. Sự **lệch nhau** giữa hai mốc chính là tín hiệu drift. Đừng "tối ưu" bằng cách gỡ chúng — `/validate-traces` đọc đúng các tag đó.
 5. **File phủ nhiều UC → lặp cả block theo từng method.** Không gộp header, không trỏ `@trace.source` vào thư mục.
+6. **Test-id là HỢP ĐỒNG, không phải chi tiết của bạn.** `@trace.testid_attr` (header tech-doc) nói gắn **thuộc tính nào**, §4.5.6 nói gắn **giá trị nào**. QC đang viết test-script theo đúng bảng đó **song song với bạn**. Nếu §4.5.6 rỗng, `/generate-code` sẽ **cảnh báo mạnh rồi hỏi Y/N** — đường đúng là dừng lại chạy `/map-testids`, đừng để AI tự bịa id.
+   - Id sinh ra **không khớp code thật** thì sửa bằng `/map-testids --from-code`, đừng sửa tay. Lệnh đó tự hạ `qc_status` → `not_run` để QC biết script cũ đã hết hiệu lực.
 6. **Sửa scenario thì bump `@trace.sc_version`** của chính SC đó — nếu bạn sửa `.feature` bằng tay. Quên bump = code cũ vĩnh viễn hiện `OK`.
 7. **Build phải pass** trước commit (`{conventions.build_command}`, ≤3 retry).
 8. `CLAUDE.md` (§2 layer/package, §3 coding standards, §5 error handling) là nguồn — AI *follow*, bạn giữ nó cập nhật.
@@ -85,7 +88,7 @@ public TokenDto login(...) { }
 - ❌ Để AI tự review code nó vừa sinh.
 - ❌ Tạo PR khi `/validate-traces` còn cờ 🔴 (`SEAM_UNWIRED` · `STUB_UNRESOLVED` · `ORPHANED` · `TRACE_ORPHAN`) — build xanh không chứng minh luồng ghép chạy đúng.
 - ❌ Coi FE `fe_phase = ui` là xong vì status đã `OK` — test đang chạy trên **mock**.
-- ❌ Tự đóng bug mình vừa fix — `/fix-bug` chỉ đặt `🟡 Fixed`; `🟢 Closed` là của `/qc-run-test`.
+- ❌ Tự đóng bug mình vừa fix — `/fix-bug` chỉ đặt `🟡 Fixed`; `🟢 Closed` là của `/qc-run-script`.
 
 ---
 

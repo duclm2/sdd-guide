@@ -42,14 +42,14 @@ Chỉ tag `@trace` ở **boundary**, không tag mọi file → tránh **tag expl
 | `status` | `/generate-code`, `/validate-traces` | OK / GAP / DRIFT / UNTRACKED |
 | `implemented_by` | `/generate-code` | File code hiện thực SC |
 | `dev_selftest` | `/dev-run-test` | Smoke của **dev** |
-| `qc_status` | `/qc-run-test`, `/report-bug` | Trạng thái QC **chính thức** (Playwright) |
+| `qc_status` | `/qc-run-script` + `/qc-run-manualtest`, `/report-bug`, **`/map-testids`** | Trạng thái QC **chính thức** (Playwright). `/map-testids` **chỉ hạ về `not_run`**, không bao giờ ghi giá trị khẳng định — xem ô "Làm mất hiệu lực" dưới |
 | `bdd_version` / `spec_ver` | spec | Version để phát hiện drift |
 | `service` *(cột 23)* | `/generate-bdd` | Đội/submodule sở hữu SC — nguồn của `by_service` trên dashboard |
 | `design_spec_version` *(cột 24)* | `/generate-bdd` | Version design-spec lúc sinh BDD *(FE/App; `—` cho backend)* |
 
 **24 cột.** TSV cũ thiếu cột mới → đọc thành giá trị rỗng, **không báo lỗi**; header tự nâng ở lần `/generate-bdd` gen lại kế tiếp. Đọc theo **tên cột ở header row**, không theo vị trí.
 
-> **Làm mất hiệu lực ≠ ghi đè.** Chủ sở hữu là người **duy nhất** ghi giá trị **khẳng định** (`pass`/`fail`/số lượng). Nhưng lệnh nào làm giá trị đó **hết đúng** (spec đổi, code đổi) **bắt buộc** hạ nó về `not_run`/`—`. Giữ một `pass` sinh ra từ spec đã bị sửa là **báo cáo sai**, không phải tôn trọng quyền sở hữu cột. Ngoại lệ có chủ ý: `qc_owner`/`qc_blocked_by` (con trỏ bug vẫn còn giá trị) và `test_count`/`test_classes` (test vẫn trên đĩa — **cảnh báo**, không hạ số, để tỷ lệ coverage không nhảy loạn).
+> **Làm mất hiệu lực ≠ ghi đè.** Chủ sở hữu là người **duy nhất** ghi giá trị **khẳng định** (`pass`/`fail`/số lượng). Nhưng lệnh nào làm giá trị đó **hết đúng** (spec đổi, code đổi) **bắt buộc** hạ nó về `not_run`/`—`. Giữ một `pass` sinh ra từ spec đã bị sửa là **báo cáo sai**, không phải tôn trọng quyền sở hữu cột. Ví dụ mới nhất: `/map-testids` ghi lại §4.5.6 → mọi test-script bám selector cũ đã hết đúng → lệnh hạ `qc_status` về `not_run` và `qc_run_at` về `—`. Ngoại lệ có chủ ý: `qc_owner`/`qc_blocked_by` (con trỏ bug vẫn còn giá trị) và `test_count`/`test_classes` (test vẫn trên đĩa — **cảnh báo**, không hạ số, để tỷ lệ coverage không nhảy loạn).
 | `gen_ver` | `/generate-code` | Version lúc sinh code (so với `spec_ver`) |
 | `test_count` | test | Số test phủ SC |
 | `last_updated` | nhiều | Mốc cập nhật |

@@ -98,9 +98,9 @@ Framework là pipeline **một chiều** — nhưng vẫn cần đường **ph�
 |---|---|---|
 | `🟢 Open` | `/report-bug` | tester/QC file bug |
 | `🟡 Fixed` | `/fix-bug` Phase 5.5 | fix đã commit + push |
-| `🟢 Closed` | **`/qc-run-test`** | QC chạy lại và `qc_status` của SC liên kết flip `pass` |
+| `🟢 Closed` | **`/qc-run-script`** | QC chạy lại và `qc_status` của SC liên kết flip `pass` |
 
-> **Dev không tự đóng bug của mình** — QC sở hữu verification. `/qc-run-test` đọc `qc_blocked_by` **trước** khi clear nó (cột đó chính là con trỏ tới bug; clear xong là mất đường về).
+> **Dev không tự đóng bug của mình** — QC sở hữu verification. `/qc-run-script` đọc `qc_blocked_by` **trước** khi clear nó (cột đó chính là con trỏ tới bug; clear xong là mất đường về).
 >
 > Ngoại lệ có chủ đích: SC pass mà bug còn `🟢 Open` (chưa ai fix) → **không đóng**, giữ `Open` + cảnh báo kiểm tra lại test. Test pass trên bug chưa fix là dấu hiệu **test sai**, không phải bug hết — tự đóng ở đây sẽ chôn một defect thật.
 
@@ -149,7 +149,7 @@ QC phát hiện: link reset vẫn dùng được sau khi đổi mật khẩu
                      → trace: test_count +2, dev_selftest → not_run
                      → BUG-217 State: 🟡 Fixed
   /dev-run-test AUTH-UC2 → dev_selftest → pass
-  /qc-run-test  AUTH-UC2 → qc_status SC1 → pass
+  /qc-run-script  AUTH-UC2 → qc_status SC1 → pass
                      → BUG-217 State: 🟢 Closed (verified)
   /learn "luôn invalidate one-time token sau khi dùng"
                      → project-lessons.md (nạp lại lần sau)

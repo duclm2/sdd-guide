@@ -19,8 +19,8 @@ Giả định đã [cài đặt](installation.md) và điền `CLAUDE.md` + `dom
 | 5 | `/generate-design-spec` | `design-spec/` | **Chỉ FE/App** — bám Figma |
 | 6 | `/generate-bdd` | `bdd/*.feature` | 🛑 UC outline; PRD lớn → sub-agent per-UC |
 | 7 | `/review-context <feature>` | findings B1–B6 | Sạch critical → `@trace.status: approved` |
-| 8 | `/generate-tech-docs` → `/review-tech-docs` | `tech-docs/*.md` | SA review + cổng ký T7 |
-| 9 | `/generate-code` | code + `.trace/*.tsv` | 🛑 comprehension checkpoint + build verify |
+| 8 | `/generate-tech-docs` → `/map-testids` → `/review-tech-docs` | `tech-docs/*.md` + §4.5.6 Test Selectors | SA review + cổng ký T7. `/map-testids` **chốt hợp đồng test-id TRƯỚC code** |
+| 9 | `/generate-code` ∥ `/qc-design-test` | code + `.trace/*.tsv` ∥ `*.Test.md` | 🛑 comprehension checkpoint + build verify. **FE và QC chạy song song** trên cùng hợp đồng §4.5.6 |
 | 10 | `/dev-gen-test` → `/dev-run-test` | dev smoke | Set `dev_selftest` |
 | 11 | `/qc-analyze` … `/qc-report` | QC report + evidence | Set `qc_status` (Playwright) |
 | 12 | `/validate-traces` | coverage matrix | spec ↔ code ↔ test |
@@ -28,7 +28,8 @@ Giả định đã [cài đặt](installation.md) và điền `CLAUDE.md` + `dom
 ```mermaid
 flowchart LR
     A["1-4 · Idea → PRD approved"] --> B["5-7 · Design-Spec + BDD"]
-    B --> C["8 · Tech-Docs"] --> D["9 · Code"]
+    B --> C["8 · Tech-Docs<br/>+ /map-testids"] --> D["9 · Code"]
+    C -.->|"hợp đồng test-id"| F
     D --> E["10 · Dev smoke"] --> F["11 · QC"] --> G["12 · Validate"]
 ```
 

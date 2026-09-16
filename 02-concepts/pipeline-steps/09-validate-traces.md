@@ -40,7 +40,7 @@ Traceability chỉ có giá trị khi **kiểm được**. Bước này cho mộ
 | Artifact | Nội dung |
 |----------|----------|
 | Ma trận coverage spec ↔ code ↔ test | Trạng thái từng SC + `code_coverage` tổng |
-| `{trace_dir}/trace-report.json` | Bản máy đọc cho **panel VS Code** ("Spec Driven Docs Tools") — bị **ghi đè** mỗi lần chạy |
+| `{trace_dir}/trace-report.json` | Bản máy đọc cho **panel VS Code** ("SDD Board") — bị **ghi đè** mỗi lần chạy |
 | `{trace_dir}/trace-history.jsonl` | **Nhật ký append-only** — mỗi lần chạy ghi thêm 1 dòng *delta*. Đây là **dữ liệu**, không phải mirror: **phải commit**, mất là mất vĩnh viễn |
 | Cờ audit | 6 cờ drift + 4 cờ 🔴 chặn PR + `PRD_UNTRACKED_EDIT` 🔴 (không chặn) + 2 cờ ⓘ (bảng dưới) |
 | Hàng đợi | Đếm PRD change request còn `Open` kèm **số ngày chờ** (Step 7b) |

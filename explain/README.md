@@ -98,12 +98,15 @@ Kết thúc bằng: **Status badge** (✅/❌/⚠️) · **Output Artifacts** (f
 - [05 · `/generate-design-spec`](05-generate-design-spec.md)
 - [06 · `/generate-bdd`](06-generate-bdd.md)
 - [07 · `/generate-tech-docs`](07-generate-tech-docs.md)
+- [**11** · `/map-testids`](11-map-testids.md) ← **chốt hợp đồng test-id, TRƯỚC code**
 - [08 · `/review-tech-docs`](08-review-tech-docs.md)
+
+> Danh sách này xếp theo **thứ tự chạy**, không theo số file. `/map-testids` giữ số `11` vì lý do lịch sử — giữ tên file để không gãy link cũ.
+> §4.5.6 chốt ở đây là lý do **Phase Implementation** và **Phase QC Automation** chạy được **song song**.
 
 ### Phase Implementation
 - [09 · `/generate-code`](09-generate-code.md)
 - [10 · `/review-code`](10-review-code.md)
-- [11 · `/map-testids`](11-map-testids.md)
 
 ### Phase Dev Self-Test
 - [12 · `/dev-gen-test`](12-dev-gen-test.md)
@@ -114,8 +117,8 @@ Kết thúc bằng: **Status badge** (✅/❌/⚠️) · **Output Artifacts** (f
 - [15 · `/qc-analyze`](15-qc-analyze.md)
 - [16 · `/qc-plan`](16-qc-plan.md)
 - [17 · `/qc-design-test`](17-qc-design-test.md)
-- [18 · `/qc-review`](18-qc-review.md)
-- [19 · `/qc-run-test`](19-qc-run-test.md)
+- [18 · `/qc-review-testcase` + `/qc-review-script`](18-qc-review.md)
+- [19 · `/qc-design-script` · `/qc-run-script` · `/qc-run-manualtest`](19-qc-run-test.md)
 - [20 · `/qc-report`](20-qc-report.md)
 
 ### Phase Trace & Quality

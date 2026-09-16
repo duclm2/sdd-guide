@@ -74,7 +74,7 @@ Mọi lệnh chạy chung một **Gate** (model check → target → context-loa
 | `/generate-code` | `.feature` approved + tech-design | Code + `.trace/*.tsv` | Dev |
 | `/review-code` | Code | Findings (read-only) | Dev/Lead |
 | `/fix-bug` | Bug report | Fix + regression test | Dev |
-| `/map-testids` | UI code | testid map (FE) | Dev |
+| `/map-testids` | design-spec + BDD (`--from-code`: + UI code) | §4.5.6 Test Selectors + `@trace.testid_attr` | Người viết tech-doc (`--from-code`: Dev) |
 | `/debug` | Mô tả lỗi | Phân tích (read-only) | Dev |
 
 ## 7 · Dev self-test
@@ -89,12 +89,17 @@ Mọi lệnh chạy chung một **Gate** (model check → target → context-loa
 
 | Lệnh | Input | Output | Owner |
 |------|-------|--------|-------|
-| `/qc-analyze` | UC + spec | `REQUIREMENT_ANALYSIS.md`, `DOC_GAPS.md` | QA |
+| `/qc-analyze` | UC + spec | `REQUIREMENT_ANALYSIS.md`, `DOC_GAP.md` + **Guard BR-tag** | QA |
 | `/qc-plan` | Analysis | `TEST_PLAN.md` (rủi ro) | QA |
-| `/qc-design-test` | Plan | `test-cases/*.Test.md` | QA |
-| `/qc-review` | Test case/script | 🛑 Cổng review | QA |
-| `/qc-run-test` | `.Test.md` reviewed | Script Playwright + `qc_status` | QA |
+| `/qc-design-test` | Plan + `.feature` + §4.5.6 | `test-cases/*.Test.md` + **Guard SC coverage** | QA |
+| `/qc-review-testcase` | Test case | 🛑 Cổng review test case | QA |
+| `/qc-automation-assess` | Test case đã duyệt | Quyết định Automatable Y/N + %Automated | QA |
+| `/qc-review-script` | Script + Page Object | 🛑 Cổng review script | QA |
+| `/qc-design-script` | `.Test.md` reviewed + bảng Automatable | Script Playwright + `qc_status`. **Chạy lại ×2 → 3 nhãn FAIL** (`script-bug`·`product-gap`·`flaky`), 🛑 người xác nhận nhãn | QA |
 | `/qc-report` | Kết quả run | Report + evidence + product-gap | QA |
+
+> **Cả sáu trạm chạy một lượt Self-Review trước khi in report**, theo `skills/qc/_shared/self-review-principles.md` (một file dùng chung, không sáu bản sao).
+> Self-review **rộng mà mềm**; Guard là phép **đếm** có hệ quả bắt buộc. Không bao giờ dùng self-review làm lý do gỡ một Guard.
 
 ## 9 · Quality & Trace
 

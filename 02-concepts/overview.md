@@ -15,8 +15,9 @@ flowchart TD
     SP --> DS["3 · Design-Spec<br/>(chỉ FE/App)"]
     SP --> B["4 · BDD<br/>/generate-bdd · /review-context"]
     DS --> B
-    B --> T["5 · Tech-Docs<br/>/generate-tech-docs · /review-tech-docs"]
+    B --> T["5 · Tech-Docs<br/>/generate-tech-docs · /map-testids · /review-tech-docs"]
     T --> C["6 · Code<br/>/generate-code"]
+    T -.->|"hợp đồng test-id §4.5.6"| Q
     C --> DV["7 · Dev self-test"]
     DV --> Q["8 · QC Automation"]
     Q --> V["9 · Validate Traces"]
@@ -27,7 +28,7 @@ flowchart TD
 
 ## Ba đặc tính bất biến (Invariants)
 
-1. **Pipeline một chiều** — output giai đoạn N là input N+1. Không nhảy bước.
+1. **Pipeline một chiều** — output giai đoạn N là input N+1. Không nhảy bước. *(Một nhánh **song song**, không phải nhảy bước: sau khi `/map-testids` chốt §4.5.6 ở bước 5, FE gắn attribute và QC dựng test **cùng lúc** trên cùng một hợp đồng đã đóng băng.)*
 2. **Gate hai đầu** mỗi giai đoạn — gate đầu vào (validate) + gate đầu ra (findings/approval).
 3. **Feedback ngược không tạo loop** — bug/scenario/lesson cải tiến spec & tri thức, rồi pipeline lại chảy một chiều.
 

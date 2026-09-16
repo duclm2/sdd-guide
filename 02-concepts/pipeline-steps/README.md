@@ -18,15 +18,16 @@ flowchart TD
     SP --> DS["3 · Design-Spec<br/>/generate-design-spec<br/><i>(chỉ FE/App)</i>"]
     SP --> B["4 · BDD<br/>/generate-bdd · /review-context"]
     DS --> B
-    B --> T["5 · Tech-Docs<br/>/generate-tech-docs · /review-tech-docs"]
+    B --> T["5 · Tech-Docs<br/>/generate-tech-docs · /map-testids · /review-tech-docs"]
     T --> C["6 · Code<br/>/generate-code · /review-code"]
+    T -.->|"hợp đồng test-id §4.5.6"| Q
     C --> DV["7 · Dev self-test<br/>/dev-gen-test · /dev-run-test · /dev-smoke-test"]
     DV --> Q["8 · QC Automation<br/>/qc-analyze → … → /qc-report"]
     Q --> V["9 · Validate Traces<br/>/validate-traces"]
     V -.->|"report-bug · propose-scenario · learn"| SP
 ```
 
-**Đặc tính bất biến:** pipeline **một chiều** — output của bước N là input của bước N+1. Mỗi bước có **gate đầu vào** (validate) và **gate đầu ra** (findings/approval). Kênh feedback ngược (bước 10) **không tạo loop** mà để cải tiến spec và tri thức dự án.
+**Đặc tính bất biến:** pipeline **một chiều** — output của bước N là input của bước N+1. *(Đường nét đứt 5 → 8 **không** phải nhảy bước: đó là hợp đồng test-id §4.5.6 được chốt ở bước 5 để QC dựng test **song song** với FE, xem [Tech-Docs](05-tech-docs.md).)* Mỗi bước có **gate đầu vào** (validate) và **gate đầu ra** (findings/approval). Kênh feedback ngược (bước 10) **không tạo loop** mà để cải tiến spec và tri thức dự án.
 
 ---
 
@@ -39,7 +40,7 @@ flowchart TD
 | 2 | [Specification](02-specification.md) | `/generate-prd` · `/refine-prd` · `/review-context` | PO (+SA/Dev review) | 🔴 cao |
 | 3 | [Design-Spec](03-design-spec.md) | `/generate-design-spec` | PO/PM | 🟠 vừa *(chỉ FE/App)* |
 | 4 | [BDD](04-bdd.md) | `/generate-bdd` · `/review-context` | PO (+Dev) | 🔴 cao |
-| 5 | [Tech-Docs](05-tech-docs.md) | `/generate-tech-docs` · `/review-tech-docs` | SA/Lead | 🟠 vừa |
+| 5 | [Tech-Docs](05-tech-docs.md) | `/generate-tech-docs` · `/map-testids` · `/review-tech-docs` | SA/Lead | 🟠 vừa |
 | 6 | [Code](06-code.md) | `/generate-code` · `/review-code` · `/fix-bug` | Dev | 🟡 mỏng |
 | 7 | [Dev self-test](07-dev-selftest.md) | `/dev-gen-test` · `/dev-run-test` · `/dev-smoke-test` | Dev | 🟡 mỏng |
 | 8 | [QC Automation](08-qc-automation.md) | `/qc-analyze` … `/qc-report` | QA/Tester | 🟠 vừa |
